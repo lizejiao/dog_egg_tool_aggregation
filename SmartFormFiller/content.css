@@ -1,0 +1,14 @@
+/* SmartFormFiller - 填充高亮样式 */
+.smart-form-filler-filled {
+  outline: 2px solid #4CAF50 !important;
+  outline-offset: 1px;
+  background-color: rgba(76, 175, 80, 0.05) !important;
+  transition: all 0.3s ease;
+  animation: sff-pulse 0.6s ease-in-out;
+}
+
+@keyframes sff-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); box-shadow: 0 0 12px rgba(76, 175, 80, 0.4); }
+  100% { transform: scale(1); }
+}

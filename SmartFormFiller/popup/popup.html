@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartFormFiller</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>📝 SmartFormFiller</h1>
+      <p class="subtitle">智能表单自动填充</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="fill">一键填充</button>
+      <button class="tab-btn" data-tab="manage">信息管理</button>
+      <button class="tab-btn" data-tab="settings">设置</button>
+    </nav>
+
+    <!-- 一键填充 Tab -->
+    <section id="tab-fill" class="tab-content active">
+      <div class="profile-selector">
+        <label>当前配置：</label>
+        <select id="profileSelect"></select>
+      </div>
+      <div class="fill-info">
+        <p id="fieldCount">已配置 <strong>0</strong> 个字段</p>
+        <div id="fieldPreview" class="field-preview"></div>
+      </div>
+      <button id="btnFill" class="btn btn-primary btn-large">
+        🚀 一键填充当前页面
+      </button>
+      <button id="btnScan" class="btn btn-secondary">
+        🔍 扫描页面字段
+      </button>
+      <div id="fillResult" class="result-box" style="display:none;"></div>
+      <div id="scanResult" class="result-box" style="display:none;"></div>
+    </section>
+
+    <!-- 信息管理 Tab -->
+    <section id="tab-manage" class="tab-content">
+      <div class="profile-header">
+        <h3>配置档案</h3>
+        <button id="btnAddProfile" class="btn btn-small btn-primary">+ 新建</button>
+      </div>
+      <div id="profileList" class="profile-list"></div>
+
+      <div id="fieldEditor" class="field-editor" style="display:none;">
+        <h3 id="editorTitle">编辑字段</h3>
+        <div id="fieldList" class="field-list"></div>
+        <div class="field-add-row">
+          <input type="text" id="newFieldKey" placeholder="匹配关键字（如：小红书名字）">
+          <input type="text" id="newFieldValue" placeholder="填充值（如：张三）">
+          <button id="btnAddField" class="btn btn-small btn-primary">添加</button>
+        </div>
+        <div class="editor-actions">
+          <button id="btnSaveProfile" class="btn btn-primary">💾 保存</button>
+          <button id="btnDeleteProfile" class="btn btn-danger">🗑 删除此配置</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 设置 Tab -->
+    <section id="tab-settings" class="tab-content">
+      <div class="setting-item">
+        <label>匹配灵敏度</label>
+        <div class="slider-group">
+          <input type="range" id="sensitivitySlider" min="0.1" max="0.9" step="0.05" value="0.4">
+          <span id="sensitivityValue">0.4</span>
+        </div>
+        <p class="setting-hint">值越低匹配越宽松（可能误填），值越高匹配越严格（可能漏填）</p>
+      </div>
+      <div class="setting-item">
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkHighlight" checked>
+          <span>高亮已填充字段</span>
+        </label>
+      </div>
+      <div class="setting-item">
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkBadge">
+          <span>显示填充数量角标</span>
+        </label>
+      </div>
+      <button id="btnSaveSettings" class="btn btn-primary">💾 保存设置</button>
+      <div id="settingsResult" class="result-box" style="display:none;"></div>
+    </section>
+
+    <footer class="footer">
+      <span>SmartFormFiller v1.0.0</span>
+    </footer>
+  </div>
+
+  <script src="../lib/storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
