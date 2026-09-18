@@ -12,3 +12,166 @@
   50% { transform: scale(1.01); box-shadow: 0 0 12px rgba(76, 175, 80, 0.4); }
   100% { transform: scale(1); }
 }
+
+/* SmartFormFiller - 输入框聚焦时的手动选择面板 */
+.sff-picker-panel {
+  position: fixed;
+  z-index: 2147483647;
+  width: 300px;
+  max-height: 360px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sff-panel-in 0.15s ease-out;
+}
+
+@keyframes sff-panel-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sff-picker-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sff-picker-header .sff-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sff-picker-header .sff-close {
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.8;
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.sff-picker-header .sff-close:hover {
+  opacity: 1;
+}
+
+.sff-picker-search {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sff-picker-search input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.sff-picker-search input:focus {
+  border-color: #667eea;
+}
+
+.sff-picker-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.sff-picker-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #f8f8f8;
+}
+
+.sff-picker-item:last-child {
+  border-bottom: none;
+}
+
+.sff-picker-item:hover {
+  background: #f0f4ff;
+}
+
+.sff-picker-item .sff-key {
+  flex: 1;
+  color: #667eea;
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sff-picker-item .sff-arrow {
+  margin: 0 8px;
+  color: #ccc;
+  font-size: 11px;
+}
+
+.sff-picker-item .sff-value {
+  flex: 1;
+  color: #333;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+.sff-picker-empty {
+  text-align: center;
+  color: #999;
+  padding: 20px 14px;
+  font-size: 12px;
+}
+
+/* SmartFormFiller - 输入框后面的手动选择按钮 */
+.sff-float-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 0 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #667eea;
+  background: #f0f4ff;
+  border: 1px solid #d1d5f0;
+  border-radius: 6px;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.sff-float-btn:hover {
+  background: #e0e7ff;
+  border-color: #667eea;
+  color: #4c5bd4;
+}
+
+.sff-float-btn .sff-btn-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.sff-float-btn .sff-btn-text {
+  font-size: 12px;
+}

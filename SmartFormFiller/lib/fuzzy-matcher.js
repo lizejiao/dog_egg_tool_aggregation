@@ -151,7 +151,7 @@ const FuzzyMatcher = (() => {
     return 0.30;
   }
 
-  return { matchScore, findBestMatch, findAllCandidates, minScoreFloor, normalize, lcsSimilarity };
+  return { matchScore, findAllCandidates, minScoreFloor, normalize, lcsSimilarity };
 })();
 
 if (typeof window !== 'undefined') {

@@ -184,7 +184,7 @@ const FieldDetector = (() => {
     return fields;
   }
 
-  return { scanPage, getAllContextTexts, getLabelText };
+  return { scanPage, getAllContextTexts, getLabelText, INPUT_SELECTORS };
 })();
 
 if (typeof window !== 'undefined') {

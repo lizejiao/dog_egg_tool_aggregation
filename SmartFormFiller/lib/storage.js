@@ -6,7 +6,6 @@ const FormStorage = (() => {
 
   const DEFAULT_SETTINGS = {
     sensitivity: 0.4,
-    autoFill: false,
     highlightMatched: true,
     showBadge: true
   };
