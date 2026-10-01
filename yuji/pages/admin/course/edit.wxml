@@ -1,0 +1,88 @@
+<!-- 课程新增 / 编辑 -->
+<view class="page page--with-bar" wx:if="{{ready}}">
+  <view class="card">
+    <view class="form-item">
+      <view class="form-label form-label--required">课程名称</view>
+      <input class="form-input" value="{{form.name}}" placeholder="如：晨间流瑜伽" placeholder-class="form-placeholder" data-field="name" bindinput="onInput" />
+    </view>
+
+    <view class="form-item" bindtap="onPickType">
+      <view class="form-label form-label--required">瑜伽类型</view>
+      <view class="form-input {{form.type ? '' : 'form-placeholder'}}">{{form.type || '请选择'}}</view>
+      <view class="form-arrow"></view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label form-label--required">授课老师</view>
+      <input class="form-input" value="{{form.teacher}}" placeholder="老师姓名" placeholder-class="form-placeholder" data-field="teacher" bindinput="onInput" />
+    </view>
+
+    <view class="form-item" bindtap="onPickLocation">
+      <view class="form-label form-label--required">上课地点</view>
+      <view class="form-input {{form.location ? '' : 'form-placeholder'}}">{{form.location || '请选择'}}</view>
+      <view class="form-arrow"></view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label form-label--required">上课日期</view>
+      <picker mode="date" start="{{today}}" value="{{form.date}}" data-field="date" bindchange="onPickerChange">
+        <view class="form-input {{form.date ? '' : 'form-placeholder'}}">{{form.date || '请选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label form-label--required">开始时间</view>
+      <picker mode="time" value="{{form.time}}" data-field="time" bindchange="onPickerChange">
+        <view class="form-input {{form.time ? '' : 'form-placeholder'}}">{{form.time || '请选择时间'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label form-label--required">时长(分钟)</view>
+      <input class="form-input" type="number" value="{{form.duration}}" placeholder="60" placeholder-class="form-placeholder" data-field="duration" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label form-label--required">容纳人数</view>
+      <input class="form-input" type="number" value="{{form.capacity}}" placeholder="12" placeholder-class="form-placeholder" data-field="capacity" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">课程状态</view>
+      <view class="row">
+        <text class="t-sub" style="margin-right: 16rpx;">{{form.status === 'open' ? '开放预约' : '已停课'}}</text>
+        <switch checked="{{form.status === 'open'}}" color="#8FA68E" bindchange="onStatusChange" />
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">课程介绍</view>
+    <textarea
+      class="form-textarea"
+      value="{{form.desc}}"
+      placeholder="简单介绍课程内容、适合人群等（选填）"
+      placeholder-class="form-placeholder"
+      maxlength="500"
+      data-field="desc"
+      bindinput="onInput"
+    />
+  </view>
+
+  <!-- 快捷选择：老师 / 地点 -->
+  <view class="card card--flat" wx:if="{{!id}}">
+    <view class="card-title">快捷填入</view>
+    <view class="chips">
+      <view class="chips__label">老师</view>
+      <view class="chip" wx:for="{{teachers}}" wx:key="*this" data-value="{{item}}" data-field="teacher" bindtap="onChipTap">{{item}}</view>
+    </view>
+    <view class="chips">
+      <view class="chips__label">地点</view>
+      <view class="chip" wx:for="{{locations}}" wx:key="*this" data-value="{{item}}" data-field="location" bindtap="onChipTap">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="bottom-bar">
+    <view class="btn btn-primary flex-1" bindtap="onSave">{{id ? '保存修改' : '创建课程'}}</view>
+  </view>
+</view>

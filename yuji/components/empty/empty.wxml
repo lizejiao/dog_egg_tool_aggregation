@@ -1,0 +1,6 @@
+<!-- 空状态组件 -->
+<view class="empty-c">
+  <view class="empty-c__icon">{{icon}}</view>
+  <view class="empty-c__title">{{title}}</view>
+  <view class="empty-c__sub" wx:if="{{sub}}">{{sub}}</view>
+</view>

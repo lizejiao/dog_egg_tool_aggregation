@@ -1,0 +1,46 @@
+# 微信小程序
+# 开发者工具生成的私有配置（含本机个性化设置，如 appid 调试开关等）
+project.private.config.json
+
+# 依赖
+node_modules/
+**/node_modules/
+package-lock.json
+# 云函数如需锁定依赖版本，可按需放开以下注释
+# !cloudfunctions/**/package-lock.json
+
+# 编译/构建产物
+dist/
+build/
+miniprogram_npm/
+
+# 云函数本地调试产物
+cloudfunctions/**/node_modules/
+
+# 日志
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编辑器
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 环境变量 / 密钥
+.env
+.env.*
+*.pem
+*.key
+
+# 临时文件
+*.tmp
+.tmp/

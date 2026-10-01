@@ -1,0 +1,50 @@
+<!-- 首页：公告 + 近期课程列表 -->
+<view class="page">
+  <!-- 顶部问候 -->
+  <view class="hero">
+    <view class="hero__hello">{{greeting}}</view>
+    <view class="hero__sub">给身体一点时间，慢慢来</view>
+    <view class="hero__card" wx:if="{{user}}">
+      <view class="hero__card-label">剩余课时</view>
+      <view class="hero__card-num">{{user.balance}}</view>
+      <view class="hero__card-unit">课时</view>
+    </view>
+  </view>
+
+  <!-- 公告轮播 -->
+  <view class="notice" wx:if="{{notices.length}}" bindtap="onNoticeTap">
+    <view class="notice__badge">公告</view>
+    <swiper
+      class="notice__swiper"
+      vertical
+      autoplay
+      circular
+      interval="4000"
+      duration="600"
+      current="{{noticeIndex}}"
+      bindchange="onNoticeChange"
+    >
+      <swiper-item wx:for="{{notices}}" wx:key="_id">
+        <view class="notice__item">{{item.title}}</view>
+      </swiper-item>
+    </swiper>
+    <view class="notice__arrow">›</view>
+  </view>
+
+  <!-- 课程列表 -->
+  <view class="group-title">近期课程</view>
+
+  <block wx:if="{{courses.length}}">
+    <course-card
+      wx:for="{{courses}}"
+      wx:key="_id"
+      course="{{item}}"
+      data-id="{{item._id}}"
+      bindselect="onCourseTap"
+    />
+    <view class="load-more" wx:if="{{finished}}">— 已经到底啦 —</view>
+    <view class="load-more" wx:elif="{{loadingMore}}">加载中…</view>
+  </block>
+
+  <empty wx:elif="{{!loading}}" icon="🌿" title="近期暂无排课" sub="馆主排课后会第一时间展示在这里" />
+</view>

@@ -1,0 +1,31 @@
+/* 课程编辑 */
+picker {
+  flex: 1;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16rpx;
+}
+
+.chips:last-child {
+  margin-bottom: 0;
+}
+
+.chips__label {
+  width: 90rpx;
+  font-size: 24rpx;
+  color: var(--text-weak);
+  flex-shrink: 0;
+}
+
+.chip {
+  font-size: 23rpx;
+  color: var(--primary-dark);
+  background-color: var(--primary-lighter);
+  border-radius: 999rpx;
+  padding: 8rpx 22rpx;
+  margin: 0 12rpx 12rpx 0;
+}

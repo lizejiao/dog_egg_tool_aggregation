@@ -1,0 +1,38 @@
+<!-- 预约管理 -->
+<view class="page">
+  <view class="tabs">
+    <view
+      class="tabs__item {{current === index ? 'tabs__item--on' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="index"
+      data-index="{{index}}"
+      bindtap="onTabChange"
+    >{{item}}</view>
+  </view>
+
+  <block wx:if="{{list.length}}">
+    <view class="card" wx:for="{{list}}" wx:key="_id">
+      <view class="od-head">
+        <view class="od-member">
+          {{item.memberName}}
+          <text class="od-phone" wx:if="{{item.memberPhone}}">{{item.memberPhone}}</text>
+        </view>
+        <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+      </view>
+
+      <view class="od-row">课程：{{item.courseName}}<text class="od-type">（{{item.courseType}}）</text></view>
+      <view class="od-row">时间：{{item.timeText}}</view>
+      <view class="od-row">老师：{{item.teacher}}　地点：{{item.location}}</view>
+      <view class="od-row od-row--weak">预约于 {{item.createText}}</view>
+      <view class="od-row od-row--weak" wx:if="{{item.statusText2}}">{{item.statusText2}}</view>
+
+      <!-- 操作 -->
+      <view class="od-foot" wx:if="{{item.status === 'booked'}}">
+        <view class="btn btn-sm btn-plain" data-id="{{item._id}}" data-name="{{item.memberName}}" bindtap="onCancel">取消预约</view>
+        <view class="btn btn-sm btn-primary" data-id="{{item._id}}" data-name="{{item.memberName}}" bindtap="onSignin">到馆签到</view>
+      </view>
+    </view>
+  </block>
+
+  <empty wx:elif="{{!loading}}" icon="📋" title="暂无预约记录" />
+</view>

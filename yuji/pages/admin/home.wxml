@@ -1,0 +1,58 @@
+<!-- 管理后台首页 -->
+<view class="page" wx:if="{{ready}}">
+  <view class="ah-hero">
+    <view class="ah-hero__title">馆主后台</view>
+    <view class="ah-hero__sub">{{shopName}} · 今日经营管理一览</view>
+
+    <!-- 概览数据 -->
+    <view class="ah-stats">
+      <view class="ah-stats__item">
+        <view class="ah-stats__num">{{overview.members}}</view>
+        <view class="ah-stats__label">会员</view>
+      </view>
+      <view class="ah-stats__item">
+        <view class="ah-stats__num">{{overview.bookedOrders}}</view>
+        <view class="ah-stats__label">待上课</view>
+      </view>
+      <view class="ah-stats__item">
+        <view class="ah-stats__num">{{overview.signedOrders}}</view>
+        <view class="ah-stats__label">已消课</view>
+      </view>
+      <view class="ah-stats__item">
+        <view class="ah-stats__num">{{overview.totalRecharge}}</view>
+        <view class="ah-stats__label">充值次数</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能入口 -->
+  <view class="card">
+    <view class="menu-item" bindtap="go" data-url="/pages/admin/order/list">
+      <view class="menu-item__left">预约管理<text class="ah-menu-sub">签到 / 取消会员预约</text></view>
+      <view class="menu-item__arrow"></view>
+    </view>
+    <view class="menu-item" bindtap="go" data-url="/pages/admin/course/list">
+      <view class="menu-item__left">课程管理<text class="ah-menu-sub">新增 / 编辑 / 删除课程</text></view>
+      <view class="menu-item__arrow"></view>
+    </view>
+    <view class="menu-item" bindtap="go" data-url="/pages/admin/member/list">
+      <view class="menu-item__left">会员管理<text class="ah-menu-sub">课时充值与扣减</text></view>
+      <view class="menu-item__arrow"></view>
+    </view>
+    <view class="menu-item" bindtap="go" data-url="/pages/admin/stats">
+      <view class="menu-item__left">课时统计<text class="ah-menu-sub">消课记录与排行</text></view>
+      <view class="menu-item__arrow"></view>
+    </view>
+  </view>
+
+  <view class="card card--flat">
+    <view class="menu-item menu-item--muted" bindtap="go" data-url="/pages/admin/notice">
+      <view class="menu-item__left">公告管理</view>
+      <view class="menu-item__arrow"></view>
+    </view>
+    <view class="menu-item menu-item--muted" bindtap="go" data-url="/pages/mine/mine">
+      <view class="menu-item__left">我的会员页</view>
+      <view class="menu-item__arrow"></view>
+    </view>
+  </view>
+</view>

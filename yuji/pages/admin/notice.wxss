@@ -1,0 +1,40 @@
+/* 公告管理 */
+.nt-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.nt-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nt-time {
+  font-size: 21rpx;
+  color: var(--text-weak);
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.nt-content {
+  font-size: 25rpx;
+  color: var(--text-sub);
+  line-height: 1.8;
+}
+
+.nt-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 18rpx;
+}
+
+.nt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}

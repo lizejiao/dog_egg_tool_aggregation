@@ -1,0 +1,90 @@
+<!-- 课程详情 -->
+<view class="page page--with-bar" wx:if="{{course}}">
+  <!-- 课程头图卡 -->
+  <view class="cd-hero">
+    <view class="cd-hero__top">
+      <text class="cd-hero__type">{{course.type}}</text>
+      <text class="tag {{course.displayClass}}">{{course.displayText}}</text>
+    </view>
+    <view class="cd-hero__name">{{course.name}}</view>
+    <view class="cd-hero__time">
+      {{course.monthDay}} {{course.weekday}} · {{course.timeRange}}
+    </view>
+    <view class="cd-hero__meta">{{course.teacher}} 老师 · {{course.location}}</view>
+
+    <!-- 名额进度 -->
+    <view class="cd-capacity">
+      <view class="cd-capacity__text">
+        <text>已预约 {{course.booked}} / {{course.capacity}} 人</text>
+        <text class="cd-capacity__remain" wx:if="{{course.remain > 0}}">剩余 {{course.remain}} 个名额</text>
+        <text class="cd-capacity__remain cd-capacity__remain--full" wx:else>名额已满</text>
+      </view>
+      <view class="cd-capacity__bar">
+        <view class="cd-capacity__inner" style="width: {{course.percent}}%;"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程信息 -->
+  <view class="card">
+    <view class="card-title">课程信息</view>
+    <view class="cd-info">
+      <view class="cd-info__item">
+        <text class="cd-info__label">上课时间</text>
+        <text class="cd-info__value">{{course.startTimeStr}}（{{course.weekday}}）</text>
+      </view>
+      <view class="cd-info__item">
+        <text class="cd-info__label">课程时长</text>
+        <text class="cd-info__value">{{course.durationText}}</text>
+      </view>
+      <view class="cd-info__item">
+        <text class="cd-info__label">授课老师</text>
+        <text class="cd-info__value">{{course.teacher}}</text>
+      </view>
+      <view class="cd-info__item">
+        <text class="cd-info__label">上课地点</text>
+        <text class="cd-info__value">{{course.location}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程介绍 -->
+  <view class="card" wx:if="{{course.desc}}">
+    <view class="card-title">课程介绍</view>
+    <view class="cd-desc">{{course.desc}}</view>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="card card--flat cd-tips">
+    <view class="cd-tips__title">温馨提示</view>
+    <view class="cd-tips__item">· 请提前 10 分钟到馆签到，自备瑜伽垫与水杯</view>
+    <view class="cd-tips__item">· 签到成功后自动扣减 1 课时</view>
+    <view class="cd-tips__item">· 如无法到课，请在开课前取消预约以释放名额</view>
+  </view>
+</view>
+
+<!-- 底部操作栏 -->
+<view class="bottom-bar" wx:if="{{course}}">
+  <!-- 已签到 -->
+  <block wx:if="{{myOrder && myOrder.status === 'signed'}}">
+    <view class="btn btn-ghost flex-1">已签到，期待下次课程</view>
+  </block>
+
+  <!-- 已预约：可取消 -->
+  <block wx:elif="{{myOrder && myOrder.status === 'booked'}}">
+    <view class="btn btn-danger" style="width: 260rpx;" bindtap="onCancel">取消预约</view>
+    <view class="btn btn-ghost flex-1">已预约成功</view>
+  </block>
+
+  <!-- 其他状态 -->
+  <block wx:else>
+    <view class="cd-remain-tip flex-1" wx:if="{{course.display === 'bookable'}}">
+      <text class="cd-remain-tip__label">剩余课时</text>
+      <text class="cd-remain-tip__num">{{balance}}</text>
+      <text class="cd-remain-tip__unit">课时</text>
+    </view>
+    <view class="btn btn-primary {{canBook ? '' : 'btn-disabled'}}" style="width: 320rpx;" bindtap="onBook">
+      {{bookButtonText}}
+    </view>
+  </block>
+</view>

@@ -1,0 +1,50 @@
+/* 管理后台首页 */
+.ah-hero {
+  background: linear-gradient(150deg, #9DAF9B 0%, #8FA68E 55%, #7E9480 100%);
+  border-radius: 28rpx;
+  padding: 36rpx 30rpx;
+  color: #FFFFFF;
+  box-shadow: 0 10rpx 30rpx rgba(126, 148, 128, 0.22);
+  margin-bottom: 26rpx;
+}
+
+.ah-hero__title {
+  font-size: 38rpx;
+  font-weight: 600;
+}
+
+.ah-hero__sub {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.ah-stats {
+  display: flex;
+  margin-top: 30rpx;
+  padding-top: 26rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.ah-stats__item {
+  flex: 1;
+  text-align: center;
+}
+
+.ah-stats__num {
+  font-size: 40rpx;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.ah-stats__label {
+  margin-top: 8rpx;
+  font-size: 21rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.ah-menu-sub {
+  font-size: 22rpx;
+  color: var(--text-weak);
+  margin-left: 14rpx;
+}

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "签到记录",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "empty": "/components/empty/empty"
+  }
+}

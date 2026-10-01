@@ -1,0 +1,19 @@
+<!-- 历史签到记录 -->
+<view class="page">
+  <block wx:if="{{list.length}}">
+    <view class="card" wx:for="{{list}}" wx:key="_id">
+      <view class="sg-head">
+        <view class="sg-name">
+          {{item.courseName}}
+          <text class="sg-type" wx:if="{{item.courseType}}">{{item.courseType}}</text>
+        </view>
+        <text class="tag tag-green">-{{item.hours}} 课时</text>
+      </view>
+      <view class="sg-row">课程时间：{{item.timeText}}</view>
+      <view class="sg-row" wx:if="{{item.teacher}}">授课老师：{{item.teacher}}</view>
+      <view class="sg-row sg-row--weak">签到时间：{{item.signinText}}</view>
+    </view>
+  </block>
+
+  <empty wx:elif="{{!loading}}" icon="🪷" title="暂无签到记录" sub="预约课程并到馆签到后会显示在这里" />
+</view>

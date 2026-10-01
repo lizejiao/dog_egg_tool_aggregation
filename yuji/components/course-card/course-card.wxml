@@ -1,0 +1,41 @@
+<!-- 课程卡片组件 -->
+<view class="cc" bindtap="onTap">
+  <!-- 左侧日期块 -->
+  <view class="cc-date">
+    <view class="cc-date__md">{{course.monthDay}}</view>
+    <view class="cc-date__week">{{course.dayLabel}}</view>
+    <view class="cc-date__time">{{course.timeRange}}</view>
+  </view>
+
+  <!-- 右侧信息 -->
+  <view class="cc-body">
+    <view class="cc-row1">
+      <text class="cc-name">{{course.name}}</text>
+      <text class="tag {{course.displayClass}}">{{course.displayText}}</text>
+    </view>
+
+    <view class="cc-meta">
+      <text class="cc-meta__item">{{course.type}}</text>
+      <text class="cc-meta__dot">·</text>
+      <text class="cc-meta__item">{{course.teacher}}</text>
+    </view>
+
+    <view class="cc-meta cc-meta--sub">
+      <text class="cc-meta__item">{{course.location}}</text>
+      <text class="cc-meta__dot">·</text>
+      <text class="cc-meta__item">{{course.durationText}}</text>
+    </view>
+
+    <view class="cc-foot">
+      <text class="cc-count">
+        已约 {{course.booked}} / {{course.capacity}}
+        <text class="cc-remain" wx:if="{{course.remain > 0}}">· 剩 {{course.remain}}</text>
+      </text>
+      <slot />
+    </view>
+
+    <view class="cc-bar">
+      <view class="cc-bar__inner" style="width: {{course.percent}}%;"></view>
+    </view>
+  </view>
+</view>

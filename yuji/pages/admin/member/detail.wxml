@@ -1,0 +1,75 @@
+<!-- 会员详情：课时调整 / 套餐开通 / 消课记录 -->
+<view class="page" wx:if="{{ready}}">
+  <!-- 会员信息 -->
+  <view class="md-hero">
+    <view class="md-hero__top">
+      <view class="md-hero__avatar">{{avatarText}}</view>
+      <view class="flex-1 md-hero__info">
+        <view class="md-hero__name">{{user.nickName || '未设置昵称'}}</view>
+        <view class="md-hero__phone">{{user.phone || '未绑定手机号'}}</view>
+      </view>
+      <view class="tag {{user.role === 'admin' ? 'tag-rose' : 'tag-green'}}">{{user.role === 'admin' ? '馆主' : '学员'}}</view>
+    </view>
+    <view class="md-hero__balance">
+      <view class="md-hero__num">{{user.balance}}</view>
+      <view class="md-hero__unit">剩余课时</view>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="card">
+    <view class="md-actions">
+      <view class="btn btn-primary flex-1" bindtap="onAddHours">增加课时</view>
+      <view class="btn btn-danger flex-1" bindtap="onDeductHours">扣减课时</view>
+      <view class="btn btn-ghost flex-1" bindtap="onRecharge">开通套餐</view>
+    </view>
+  </view>
+
+  <!-- 已购套餐 -->
+  <view class="group-title" wx:if="{{myPackages.length}}">已购套餐（{{myPackages.length}}）</view>
+  <view class="card card--flat" wx:if="{{myPackages.length}}">
+    <view class="md-pkg" wx:for="{{myPackages}}" wx:key="boughtAt">
+      <view class="flex-1">
+        <view class="md-pkg__name">{{item.name}}</view>
+        <view class="md-pkg__meta">已用 {{item.usedHours}} / {{item.totalHours}}{{item.expireText}}</view>
+      </view>
+      <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+    </view>
+  </view>
+
+  <!-- 记录 tabs -->
+  <view class="tabs">
+    <view class="tabs__item {{activeTab === 0 ? 'tabs__item--on' : ''}}" data-index="0" bindtap="onTabChange">课时流水</view>
+    <view class="tabs__item {{activeTab === 1 ? 'tabs__item--on' : ''}}" data-index="1" bindtap="onTabChange">签到记录</view>
+  </view>
+
+  <!-- 课时流水 -->
+  <block wx:if="{{activeTab === 0}}">
+    <block wx:if="{{logs.length}}">
+      <view class="card card--flat" wx:for="{{logs}}" wx:key="_id">
+        <view class="md-log__head">
+          <text class="md-log__title">{{item.reason}}</text>
+          <text class="md-log__amount {{item.amount > 0 ? 't-primary' : 't-rose'}}">{{item.amount > 0 ? '+' : ''}}{{item.amount}}</text>
+        </view>
+        <view class="md-log__meta">
+          {{item.typeText}} · 变动后 {{item.balanceAfter}} 课时 · {{item.timeText}}
+        </view>
+      </view>
+    </block>
+    <empty wx:else icon="📖" title="暂无课时流水" />
+  </block>
+
+  <!-- 签到记录 -->
+  <block wx:if="{{activeTab === 1}}">
+    <block wx:if="{{signins.length}}">
+      <view class="card card--flat" wx:for="{{signins}}" wx:key="_id">
+        <view class="md-log__head">
+          <text class="md-log__title">{{item.courseName}}</text>
+          <text class="tag tag-green">-{{item.hours}} 课时</text>
+        </view>
+        <view class="md-log__meta">签到于 {{item.signinText}}</view>
+      </view>
+    </block>
+    <empty wx:else icon="🪷" title="暂无签到记录" />
+  </block>
+</view>

@@ -1,0 +1,44 @@
+<!-- 公告管理 -->
+<view class="page page--with-bar">
+  <!-- 编辑表单 -->
+  <view class="card" wx:if="{{showForm}}">
+    <view class="card-title">{{formId ? '编辑公告' : '新增公告'}}</view>
+    <view class="form-item">
+      <view class="form-label form-label--required">标题</view>
+      <input class="form-input" value="{{formTitle}}" placeholder="公告标题" placeholder-class="form-placeholder" bindinput="onTitleInput" />
+    </view>
+    <textarea
+      class="form-textarea"
+      value="{{formContent}}"
+      placeholder="公告内容，将展示在首页公告栏"
+      placeholder-class="form-placeholder"
+      maxlength="500"
+      bindinput="onContentInput"
+    />
+    <view class="nt-actions">
+      <view class="btn btn-sm btn-plain" bindtap="onCancelForm">取消</view>
+      <view class="btn btn-sm btn-primary" bindtap="onSaveNotice">保存公告</view>
+    </view>
+  </view>
+
+  <!-- 公告列表 -->
+  <block wx:if="{{list.length}}">
+    <view class="card" wx:for="{{list}}" wx:key="_id">
+      <view class="nt-head">
+        <text class="nt-title">{{item.title}}</text>
+        <text class="nt-time">{{item.timeText}}</text>
+      </view>
+      <view class="nt-content">{{item.content}}</view>
+      <view class="nt-foot">
+        <view class="btn btn-sm btn-plain" data-id="{{item._id}}" data-title="{{item.title}}" data-content="{{item.content}}" bindtap="onEdit">编辑</view>
+        <view class="btn btn-sm btn-danger" data-id="{{item._id}}" data-title="{{item.title}}" bindtap="onDelete">删除</view>
+      </view>
+    </view>
+  </block>
+
+  <empty wx:elif="{{!loading && !showForm}}" icon="📣" title="暂无公告" sub="新增一条公告，首页会自动轮播展示" />
+
+  <view class="bottom-bar" wx:if="{{!showForm}}">
+    <view class="btn btn-primary flex-1" bindtap="onAdd">＋ 新增公告</view>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "name": "booking",
+  "version": "1.0.0",
+  "description": "预约 / 取消 / 签到 / 消课",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

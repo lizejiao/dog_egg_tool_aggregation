@@ -1,0 +1,62 @@
+<!-- 课时统计 -->
+<view class="page">
+  <!-- 概览 -->
+  <view class="card">
+    <view class="card-title">数据概览</view>
+    <view class="st-grid">
+      <view class="st-grid__item">
+        <view class="st-grid__num">{{overview.members}}</view>
+        <view class="st-grid__label">会员总数</view>
+      </view>
+      <view class="st-grid__item">
+        <view class="st-grid__num">{{overview.signedOrders}}</view>
+        <view class="st-grid__label">累计消课</view>
+      </view>
+      <view class="st-grid__item">
+        <view class="st-grid__num">{{overview.bookedOrders}}</view>
+        <view class="st-grid__label">待上课</view>
+      </view>
+      <view class="st-grid__item">
+        <view class="st-grid__num">{{overview.totalRecharge}}</view>
+        <view class="st-grid__label">充值/增加</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 近 30 天消课趋势 -->
+  <view class="card" wx:if="{{daily.length}}">
+    <view class="card-title">近 30 天消课趋势</view>
+    <view class="st-trend">
+      <view class="st-trend__item" wx:for="{{daily}}" wx:key="_id">
+        <view class="st-trend__bar-wrap">
+          <view class="st-trend__bar" style="height: {{item.percent}}%;"></view>
+        </view>
+        <view class="st-trend__date">{{item.label}}</view>
+        <view class="st-trend__count">{{item.count}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 会员消课排行 -->
+  <view class="group-title">会员消课排行（点击查看明细）</view>
+  <block wx:if="{{perMember.length}}">
+    <view
+      class="card card--flat st-member"
+      wx:for="{{perMember}}"
+      wx:key="openid"
+      data-openid="{{item.openid}}"
+      bindtap="onMemberTap"
+    >
+      <view class="st-rank {{index < 3 ? 'st-rank--top' : ''}}">{{index + 1}}</view>
+      <view class="flex-1 st-member__info">
+        <view class="row">
+          <text class="st-member__name">{{item.nickName}}</text>
+          <text class="st-member__phone" wx:if="{{item.phone}}">{{item.phone}}</text>
+        </view>
+        <view class="st-member__meta">累计消课 {{item.hours}} 课时 · 剩余 {{item.balance}} 课时</view>
+      </view>
+      <view class="menu-item__arrow"></view>
+    </view>
+  </block>
+  <empty wx:else icon="📊" title="暂无消课数据" sub="会员签到后会自动统计" />
+</view>

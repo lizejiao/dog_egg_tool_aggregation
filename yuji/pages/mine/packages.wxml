@@ -1,0 +1,44 @@
+<!-- 我的课时套餐 -->
+<view class="page">
+  <!-- 剩余课时 -->
+  <view class="pk-summary">
+    <view class="pk-summary__num">{{user.balance || 0}}<text class="pk-summary__unit">课时</text></view>
+    <view class="pk-summary__label">当前剩余课时</view>
+  </view>
+
+  <!-- 已购套餐 -->
+  <view class="group-title">我的套餐</view>
+  <block wx:if="{{myPackages.length}}">
+    <view class="card" wx:for="{{myPackages}}" wx:key="boughtAt">
+      <view class="pk-head">
+        <view class="pk-name">{{item.name}}</view>
+        <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+      </view>
+      <view class="pk-progress">
+        <view class="pk-progress__bar">
+          <view class="pk-progress__inner" style="width: {{item.percent}}%;"></view>
+        </view>
+        <text class="pk-progress__text">已用 {{item.usedHours}} / {{item.totalHours}} 课时</text>
+      </view>
+      <view class="pk-meta">
+        购买于 {{item.boughtText}}
+        <text wx:if="{{item.expireText}}"> · {{item.expireText}}</text>
+      </view>
+    </view>
+  </block>
+  <empty wx:else icon="🎁" title="还没有课时套餐" sub="选择下方套餐，联系馆主开通" />
+
+  <!-- 可购套餐 -->
+  <view class="group-title" wx:if="{{shopPackages.length}}">可选套餐</view>
+  <view class="card pk-shop" wx:for="{{shopPackages}}" wx:key="_id">
+    <view class="flex-1">
+      <view class="pk-name">{{item.name}}</view>
+      <view class="pk-shop__desc" wx:if="{{item.desc}}">{{item.desc}}</view>
+      <view class="pk-shop__meta">{{item.totalHours}} 课时<text wx:if="{{item.validDays}}"> · {{item.validDays}} 天有效</text><text wx:else> · 长期有效</text></view>
+    </view>
+    <view class="pk-shop__right">
+      <view class="pk-shop__price">{{item.priceText}}</view>
+      <view class="btn btn-sm btn-ghost" bindtap="onContact">咨询购买</view>
+    </view>
+  </view>
+</view>

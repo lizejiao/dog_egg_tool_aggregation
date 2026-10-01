@@ -1,0 +1,9 @@
+{
+  "name": "member",
+  "version": "1.0.0",
+  "description": "会员管理 / 课时调整 / 课时统计",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

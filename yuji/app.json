@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/course/detail",
+    "pages/mine/mine",
+    "pages/mine/orders",
+    "pages/mine/packages",
+    "pages/mine/signins",
+    "pages/admin/home",
+    "pages/admin/course/list",
+    "pages/admin/course/edit",
+    "pages/admin/member/list",
+    "pages/admin/member/detail",
+    "pages/admin/order/list",
+    "pages/admin/stats",
+    "pages/admin/notice"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "backgroundColor": "#F6F4F1",
+    "navigationBarBackgroundColor": "#F6F4F1",
+    "navigationBarTitleText": "瑜伽馆",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#B4BAB5",
+    "selectedColor": "#8FA68E",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "课程",
+        "iconPath": "images/tab-course.png",
+        "selectedIconPath": "images/tab-course-on.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "images/tab-mine.png",
+        "selectedIconPath": "images/tab-mine-on.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

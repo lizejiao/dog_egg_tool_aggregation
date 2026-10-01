@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "公告管理",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "empty": "/components/empty/empty"
+  }
+}

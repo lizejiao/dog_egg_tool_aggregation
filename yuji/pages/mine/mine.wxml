@@ -1,0 +1,98 @@
+<!-- 我的：会员信息 + 课时 + 功能入口 -->
+<view class="page">
+  <!-- 会员卡 -->
+  <view class="member-card">
+    <view class="member-card__top">
+      <!-- 微信一键选择头像 -->
+      <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+        <view class="avatar-edit">改</view>
+      </button>
+
+      <view class="member-info">
+        <!-- 微信昵称键盘 -->
+        <input
+          class="nickname-input"
+          type="nickname"
+          value="{{nickName}}"
+          placeholder="点击设置昵称"
+          placeholder-class="nickname-placeholder"
+          bindblur="onNicknameBlur"
+        />
+        <!-- 微信一键获取手机号；不支持时自动降级为手动输入 -->
+        <button
+          class="phone-btn"
+          open-type="getPhoneNumber"
+          bindgetphonenumber="onGetPhoneNumber"
+        >{{phoneText}}</button>
+      </view>
+
+      <view class="tag {{isAdmin ? 'tag-rose' : 'tag-green'}}">{{roleText}}</view>
+    </view>
+
+    <view class="member-divider"></view>
+
+    <!-- 剩余课时 -->
+    <view class="member-balance" bindtap="goPackages">
+      <view class="member-balance__left">
+        <view class="member-balance__label">剩余课时</view>
+        <view class="member-balance__num">
+          {{user.balance || 0}}<text class="member-balance__unit">课时</text>
+        </view>
+      </view>
+      <view class="member-balance__right" wx:if="{{activePackages.length}}">
+        {{activePackages.length}} 个套餐使用中 <text class="arrow">›</text>
+      </view>
+      <view class="member-balance__right" wx:else>
+        了解课时套餐 <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的记录 -->
+  <view class="card">
+    <view class="menu-item" bindtap="goOrders">
+      <view class="menu-item__left">我的预约</view>
+      <view class="row">
+        <view class="menu-badge" wx:if="{{bookedCount > 0}}">{{bookedCount}}</view>
+        <view class="menu-item__arrow"></view>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goPackages">
+      <view class="menu-item__left">我的课时套餐</view>
+      <view class="menu-item__arrow"></view>
+    </view>
+    <view class="menu-item" bindtap="goSignins">
+      <view class="menu-item__left">签到记录</view>
+      <view class="row">
+        <view class="menu-badge" wx:if="{{signinCount > 0}}">{{signinCount}}</view>
+        <view class="menu-item__arrow"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 馆主管理入口（仅管理员可见） -->
+  <view class="card" wx:if="{{isAdmin}}">
+    <view class="menu-item" bindtap="goAdmin">
+      <view class="menu-item__left t-primary">馆主管理后台</view>
+      <view class="menu-item__arrow"></view>
+    </view>
+  </view>
+
+  <!-- 馆主入口：输入口令升级为管理员 -->
+  <view class="card card--flat" wx:if="{{!isAdmin}}">
+    <view class="menu-item menu-item--muted" bindtap="onBindAdmin">
+      <view class="menu-item__left">馆主入口</view>
+      <view class="menu-item__arrow"></view>
+    </view>
+  </view>
+
+  <!-- 首次部署初始化 -->
+  <view class="card card--flat" wx:if="{{!isAdmin}}">
+    <view class="menu-item menu-item--muted" bindtap="onInitDatabase">
+      <view class="menu-item__left">初始化数据（首次使用）</view>
+    </view>
+  </view>
+
+  <view class="footer-tip">悦己瑜伽 · 让每一次呼吸都被照顾</view>
+</view>

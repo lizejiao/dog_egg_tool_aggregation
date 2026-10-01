@@ -1,0 +1,33 @@
+<!-- 课程管理列表 -->
+<view class="page page--with-bar">
+  <block wx:if="{{list.length}}">
+    <view class="card" wx:for="{{list}}" wx:key="_id">
+      <view class="cl-head">
+        <view class="cl-name">
+          {{item.name}}
+          <text class="cl-type">{{item.type}}</text>
+        </view>
+        <text class="tag {{item.displayClass}}">{{item.displayText}}</text>
+      </view>
+
+      <view class="cl-row">时间：{{item.startTimeStr}}（{{item.weekday}}）{{item.timeRange}}</view>
+      <view class="cl-row">老师：{{item.teacher}}　地点：{{item.location}}</view>
+      <view class="cl-row">
+        预约：{{item.booked}} / {{item.capacity}} 人
+        <text class="cl-remain" wx:if="{{item.remain > 0}}">　剩余 {{item.remain}}</text>
+      </view>
+
+      <view class="cl-foot">
+        <view class="btn btn-sm btn-plain" data-id="{{item._id}}" bindtap="onEdit">编辑</view>
+        <view class="btn btn-sm btn-danger" data-id="{{item._id}}" data-name="{{item.name}}" bindtap="onDelete">删除</view>
+      </view>
+    </view>
+  </block>
+
+  <empty wx:elif="{{!loading}}" icon="🌿" title="还没有课程" sub="点击下方按钮新增第一节课" />
+
+  <!-- 新增按钮 -->
+  <view class="bottom-bar">
+    <view class="btn btn-primary flex-1" bindtap="onAdd">＋ 新增课程</view>
+  </view>
+</view>

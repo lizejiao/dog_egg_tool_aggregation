@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "瑜伽馆",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "course-card": "/components/course-card/course-card",
+    "empty": "/components/empty/empty"
+  }
+}

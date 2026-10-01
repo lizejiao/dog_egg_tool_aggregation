@@ -1,0 +1,114 @@
+/* 课程卡片 */
+.cc {
+  display: flex;
+  background-color: var(--card);
+  border-radius: 24rpx;
+  padding: 26rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 6rpx 20rpx rgba(120, 128, 118, 0.05);
+}
+
+/* 左侧日期块 */
+.cc-date {
+  width: 140rpx;
+  flex-shrink: 0;
+  margin-right: 24rpx;
+  padding: 20rpx 0;
+  border-radius: 18rpx;
+  background-color: var(--primary-lighter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-date__md {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--primary-dark);
+  letter-spacing: 1rpx;
+}
+
+.cc-date__week {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  margin: 4rpx 0;
+}
+
+.cc-date__time {
+  font-size: 22rpx;
+  color: var(--primary-dark);
+}
+
+/* 右侧 */
+.cc-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cc-row1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6rpx;
+}
+
+.cc-name {
+  font-size: 31rpx;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 16rpx;
+}
+
+.cc-meta {
+  display: flex;
+  align-items: center;
+  font-size: 25rpx;
+  color: var(--text-sub);
+  margin-top: 4rpx;
+}
+
+.cc-meta--sub {
+  font-size: 23rpx;
+  color: var(--text-weak);
+}
+
+.cc-meta__dot {
+  margin: 0 10rpx;
+  color: var(--line-dark);
+}
+
+.cc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14rpx;
+}
+
+.cc-count {
+  font-size: 23rpx;
+  color: var(--text-weak);
+}
+
+.cc-remain {
+  color: var(--primary-dark);
+}
+
+/* 名额进度条 */
+.cc-bar {
+  height: 8rpx;
+  border-radius: 999rpx;
+  background-color: #F1EFEC;
+  margin-top: 12rpx;
+  overflow: hidden;
+}
+
+.cc-bar__inner {
+  height: 100%;
+  border-radius: 999rpx;
+  background-color: var(--primary);
+  transition: width 0.25s ease-out;
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "会员详情",
+  "usingComponents": {
+    "empty": "/components/empty/empty"
+  }
+}

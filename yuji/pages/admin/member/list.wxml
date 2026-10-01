@@ -1,0 +1,40 @@
+<!-- 会员列表 -->
+<view class="page page--with-bar">
+  <!-- 搜索 -->
+  <view class="search">
+    <input
+      class="search__input"
+      value="{{keyword}}"
+      placeholder="搜索昵称 / 手机号"
+      placeholder-class="form-placeholder"
+      confirm-type="search"
+      bindconfirm="onSearch"
+      bindinput="onKeywordInput"
+    />
+    <view class="search__btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <block wx:if="{{list.length}}">
+    <view class="card card--flat mb-item" wx:for="{{list}}" wx:key="_id" data-openid="{{item.openid}}" bindtap="onItemTap">
+      <view class="mb-avatar">{{item.avatarText}}</view>
+      <view class="flex-1 ml-16">
+        <view class="row">
+          <text class="mb-name">{{item.nickName || '未设置昵称'}}</text>
+          <text class="tag {{item.role === 'admin' ? 'tag-rose' : 'tag-green'}}">{{item.role === 'admin' ? '馆主' : '学员'}}</text>
+        </view>
+        <view class="mb-phone">{{item.phone || '未绑定手机号'}}</view>
+      </view>
+      <view class="mb-balance">
+        <view class="mb-balance__num">{{item.balance}}</view>
+        <view class="mb-balance__label">课时</view>
+      </view>
+    </view>
+    <view class="load-more" wx:if="{{finished}}">— 共 {{total}} 位会员 —</view>
+  </block>
+
+  <empty wx:elif="{{!loading}}" icon="🧘" title="暂无会员" sub="会员登录小程序后会自动建档" />
+
+  <view class="bottom-bar">
+    <view class="btn btn-ghost flex-1" bindtap="onGoStats">查看课时统计</view>
+  </view>
+</view>
