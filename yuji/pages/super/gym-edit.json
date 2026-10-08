@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "创建场馆",
+  "usingComponents": {
+    "city-picker": "/components/city-picker/city-picker"
+  }
+}

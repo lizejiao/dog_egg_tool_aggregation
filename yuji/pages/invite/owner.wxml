@@ -1,0 +1,50 @@
+<!-- 邀请落地页 -->
+<view class="page">
+  <block wx:if="{{loading}}">
+    <view class="invite-loading">加载中…</view>
+  </block>
+
+  <block wx:elif="{{invite && invite.status === 'pending'}}">
+    <view class="invite-hero">
+      <view class="invite-hero__emoji">🧘‍♀️</view>
+      <view class="invite-hero__title">邀请你成为馆主</view>
+      <view class="invite-hero__gym">{{invite.gymName}}</view>
+      <view class="invite-hero__sub">接受邀请后，你可以：</view>
+      <view class="invite-hero__list">
+        <view class="invite-hero__item">· 完善场馆信息（地址 / 电话 / 简介）</view>
+        <view class="invite-hero__item">· 创建和管理课程排期</view>
+        <view class="invite-hero__item">· 查看会员预约与签到</view>
+      </view>
+    </view>
+
+    <button class="btn-primary" bindtap="onAccept" disabled="{{accepting}}">接受邀请，成为馆主</button>
+    <view class="invite-skip" bindtap="onBack">暂不接受，先去看看</view>
+  </block>
+
+  <block wx:elif="{{invite && invite.status === 'accepted' && invite.mine}}">
+    <view class="invite-result">
+      <view class="invite-result__emoji">✅</view>
+      <view class="invite-result__title">你已是「{{invite.gymName}}」的馆主</view>
+      <button class="btn-primary" bindtap="onBack">进入工作台</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{invite}}">
+    <view class="invite-result">
+      <view class="invite-result__emoji">{{invite.status === 'expired' ? '⏰' : '🚫'}}</view>
+      <view class="invite-result__title">
+        {{invite.status === 'expired' ? '邀请已过期' : invite.status === 'revoked' ? '邀请已被撤销' : '邀请已被处理'}}
+      </view>
+      <view class="invite-result__sub">请联系超级管理员重新发起邀请</view>
+      <view class="invite-skip" bindtap="onBack">回首页</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="invite-result">
+      <view class="invite-result__emoji">🤔</view>
+      <view class="invite-result__title">邀请不存在</view>
+      <view class="invite-skip" bindtap="onBack">回首页</view>
+    </view>
+  </block>
+</view>

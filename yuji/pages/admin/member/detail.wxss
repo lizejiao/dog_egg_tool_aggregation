@@ -145,3 +145,13 @@
   color: var(--text-weak);
   margin-top: 6rpx;
 }
+
+/* 课时清零入口（危险操作，弱化显示） */
+.md-reset {
+  margin-top: 20rpx;
+  padding: 14rpx 0 4rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-weak, #BBB);
+  text-decoration: underline;
+}

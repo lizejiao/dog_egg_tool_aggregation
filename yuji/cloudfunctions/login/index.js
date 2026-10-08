@@ -1,7 +1,8 @@
 /**
  * 云函数：login
  * ------------------------------------------------------------------
- * 职责：静默登录（openid 识别会员）、资料完善、手机号绑定、管理员口令绑定
+ * 职责：静默登录（openid 识别会员）、资料完善、手机号绑定、
+ *       超级管理员手机号自动识别、登录返回名下场馆（myGyms）
  * 返回结构：{ code, data, message }
  * ------------------------------------------------------------------
  */
@@ -9,12 +10,13 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
-/* ==================== 管理员配置（改这里） ==================== */
-// 方式一：把馆主的 openid 写进数组，该用户登录后自动成为管理员
-const ADMIN_OPENIDS = []
-
-// 方式二：管理员口令。学员在「我的 → 馆主入口」输入正确口令后升级为管理员
-const ADMIN_PASSWORD = 'yoga2026'
+/* ==================== 超级管理员配置（改这里） ==================== */
+// 手机号命中名单 → 自动升级为 superadmin（登录时 & 绑定手机号后判定）
+const SUPER_ADMIN_PHONES = ['17611028882']
+// openid 兜底名单（可选）：防止他人手动输入超管手机号冒充。
+// 用真机打开小程序登录一次 → 云开发控制台 users 集合复制自己的 openid 填入。
+// 留空数组 = 不启用 openid 兜底。
+const SUPER_ADMIN_OPENIDS = []
 /* ============================================================= */
 
 const ok = (data) => ({ code: 0, data, message: 'ok' })
@@ -28,6 +30,13 @@ function bizErr(message, code = 1) {
   return err
 }
 
+/** 是否命中超管规则 */
+function isSuperAdmin(user) {
+  if (SUPER_ADMIN_OPENIDS.indexOf(user.openid) > -1) return true
+  if (user.phone && SUPER_ADMIN_PHONES.indexOf(user.phone) > -1) return true
+  return false
+}
+
 /** 查询用户，不存在则创建（首次进入小程序） */
 async function getOrCreateUser(openid) {
   const res = await db.collection('users').where({ openid }).get()
@@ -39,17 +48,59 @@ async function getOrCreateUser(openid) {
       nickName: '',
       avatarUrl: '',
       phone: '',
-      // 在 ADMIN_OPENIDS 名单里的 openid 自动授予管理员
-      role: ADMIN_OPENIDS.indexOf(openid) > -1 ? 'admin' : 'student',
-      balance: 0, // 剩余课时
-      packages: [], // 已购课时套餐 [{packageId,name,totalHours,usedHours,price,expireAt,boughtAt}]
+      role: 'student',
+      balance: 0, // 剩余课时（全部馆合计，展示用；权威在各 packages 明细）
+      packages: [], // 已购课时套餐 [{gymId,packageId,name,totalHours,usedHours,price,expireAt,boughtAt}]
       createTime: now,
       updateTime: now
     }
+    // openid 白名单兜底：首次建档即超管
+    if (SUPER_ADMIN_OPENIDS.indexOf(openid) > -1) doc.role = 'superadmin'
     const added = await db.collection('users').add({ data: doc })
     user = Object.assign({ _id: added._id }, doc)
   }
   return user
+}
+
+/** 手机号绑定后 / 登录时的超管身份同步（升或降都处理） */
+async function syncSuperAdminRole(user) {
+  const should = isSuperAdmin(user)
+  const isNow = user.role === 'superadmin'
+  if (should && !isNow) {
+    // 升级为超管（原是馆主则同时摘除其名下场馆的 ownerOpenid）
+    if (user.role === 'owner') await detachOwnedGyms(user.openid)
+    await db
+      .collection('users')
+      .doc(user._id)
+      .update({ data: { role: 'superadmin', updateTime: Date.now() } })
+    user.role = 'superadmin'
+  } else if (!should && isNow) {
+    // 手机号解绑等场景导致不再命中 → 降回学员
+    await db
+      .collection('users')
+      .doc(user._id)
+      .update({ data: { role: 'student', updateTime: Date.now() } })
+    user.role = 'student'
+  }
+  return user
+}
+
+/** 摘除名下场馆（升级超管时用） */
+async function detachOwnedGyms(openid) {
+  await db
+    .collection('gyms')
+    .where({ ownerOpenid: openid })
+    .update({ data: { ownerOpenid: '', updateTime: Date.now() } })
+}
+
+/** 名下场馆列表 */
+async function getMyGyms(openid) {
+  const res = await db
+    .collection('gyms')
+    .where({ ownerOpenid: openid })
+    .orderBy('createTime', 'desc')
+    .get()
+  return res.data.map((g) => ({ _id: g._id, name: g.name, city: g.city, status: g.status }))
 }
 
 /** 掩码显示手机号 */
@@ -72,19 +123,30 @@ exports.main = async (event) => {
   try {
     /* ---------- 静默登录：拿 openid，没有则建档案 ---------- */
     if (action === 'login') {
-      const user = await getOrCreateUser(OPENID)
-      return ok({ user: safeUser(user) })
+      let user = await getOrCreateUser(OPENID)
+      user = await syncSuperAdminRole(user)
+      const myGyms = user.role === 'owner' ? await getMyGyms(OPENID) : []
+      return ok({ user: safeUser(user), myGyms })
     }
 
-    /* ---------- 更新昵称 / 头像 ---------- */
+    /* ---------- 更新昵称 / 头像（只更新传入的字段，避免互相覆盖） ---------- */
     if (action === 'updateProfile') {
-      const nickName = String(event.nickName || '').trim().slice(0, 20)
-      const avatarUrl = String(event.avatarUrl || '').trim().slice(0, 500)
-      if (!nickName && !avatarUrl) return fail('请填写昵称或头像')
+      const data = { updateTime: Date.now() }
+      if (event.nickName !== undefined) {
+        const nickName = String(event.nickName || '').trim().slice(0, 20)
+        if (!nickName) return fail('昵称不能为空')
+        data.nickName = nickName
+      }
+      if (event.avatarUrl !== undefined) {
+        const avatarUrl = String(event.avatarUrl || '').trim().slice(0, 500)
+        if (!avatarUrl) return fail('头像不能为空')
+        data.avatarUrl = avatarUrl
+      }
+      if (Object.keys(data).length === 1) return fail('请填写昵称或头像')
       await db
         .collection('users')
         .where({ openid: OPENID })
-        .update({ data: { nickName, avatarUrl, updateTime: Date.now() } })
+        .update({ data })
       return ok({})
     }
 
@@ -99,7 +161,12 @@ exports.main = async (event) => {
         .collection('users')
         .where({ openid: OPENID })
         .update({ data: { phone, updateTime: Date.now() } })
-      return ok({ phone })
+      // 绑定手机号后重新判定超管身份
+      let user = await getOrCreateUser(OPENID)
+      user.phone = phone
+      user = await syncSuperAdminRole(user)
+      const myGyms = user.role === 'owner' ? await getMyGyms(OPENID) : []
+      return ok({ phone, role: user.role, myGyms })
     }
 
     /* ---------- 手动填写手机号 ---------- */
@@ -110,21 +177,12 @@ exports.main = async (event) => {
         .collection('users')
         .where({ openid: OPENID })
         .update({ data: { phone, updateTime: Date.now() } })
-      return ok({ phone })
-    }
-
-    /* ---------- 管理员口令绑定：口令正确则把当前用户升级为管理员 ---------- */
-    if (action === 'bindAdmin') {
-      const password = String(event.password || '').trim()
-      if (!password) return fail('请输入管理员口令')
-      if (password !== ADMIN_PASSWORD) return fail('口令不正确')
-
-      const user = await getOrCreateUser(OPENID)
-      await db
-        .collection('users')
-        .doc(user._id)
-        .update({ data: { role: 'admin', updateTime: Date.now() } })
-      return ok({})
+      // 绑定手机号后重新判定超管身份
+      let user = await getOrCreateUser(OPENID)
+      user.phone = phone
+      user = await syncSuperAdminRole(user)
+      const myGyms = user.role === 'owner' ? await getMyGyms(OPENID) : []
+      return ok({ phone, role: user.role, myGyms })
     }
 
     return fail('未知操作：' + action, 404)

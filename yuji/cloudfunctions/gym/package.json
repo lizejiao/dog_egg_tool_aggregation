@@ -1,0 +1,9 @@
+{
+  "name": "gym",
+  "version": "1.0.0",
+  "description": "场馆管理（多馆平台核心）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

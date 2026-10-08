@@ -15,7 +15,8 @@ App({
   globalData: {
     openid: '', // 当前用户 openid
     user: null, // 用户记录（含 role / balance / packages）
-    isAdmin: false, // 是否管理员
+    isAdmin: false, // 是否有后台权限（owner / superadmin / admin）
+    myGyms: [], // 馆主名下场馆 [{_id, name, city, status}]
     windowInfo: null // 窗口信息（用于安全区适配）
   },
 
@@ -71,7 +72,8 @@ App({
       const user = data.user || {}
       this.globalData.openid = user.openid || ''
       this.globalData.user = user
-      this.globalData.isAdmin = user.role === 'admin'
+      this.globalData.isAdmin = user.role === 'owner' || user.role === 'superadmin' || user.role === 'admin'
+      this.globalData.myGyms = data.myGyms || []
       return user
     })
 
@@ -83,10 +85,19 @@ App({
     return this._loginPromise
   },
 
-  /** 页面里等待登录完成的统一入口 */
+  /** 页面里等待登录完成的统一入口（退出状态下不自动登录） */
   ensureLogin() {
+    if (this._loggedOut) {
+      return Promise.reject(new Error('已退出登录'))
+    }
     if (this.globalData.user) return Promise.resolve(this.globalData.user)
     return this.login()
+  },
+
+  /** 退出后重新登录 */
+  relogin() {
+    this._loggedOut = false
+    return this.login(true)
   },
 
   /** 强制刷新用户资料（预约 / 签到 / 充值后调用，同步剩余课时） */
@@ -97,13 +108,31 @@ App({
   /** 本地退出（仅清理缓存，下次进入会重新静默登录） */
   logout() {
     this._loginPromise = null
+    this._loggedOut = true
     this.globalData.openid = ''
     this.globalData.user = null
     this.globalData.isAdmin = false
+    this.globalData.myGyms = []
   },
 
-  /** 当前是否管理员（以服务端 role 为准） */
+  /** 当前是否有后台权限（馆主 / 超管 / 迁移期旧 admin） */
   isAdmin() {
-    return !!(this.globalData.user && this.globalData.user.role === 'admin')
+    const role = this.globalData.user && this.globalData.user.role
+    return role === 'owner' || role === 'superadmin' || role === 'admin'
+  },
+
+  /** 当前是否超级管理员 */
+  isSuperAdmin() {
+    return !!(this.globalData.user && this.globalData.user.role === 'superadmin')
+  },
+
+  /** 当前是否已登录（未退出且有用户信息） */
+  isLoggedIn() {
+    return !this._loggedOut && !!this.globalData.user
+  },
+
+  /** 名下场馆（馆主用；超管返回空数组，走平台管理页） */
+  getMyGyms() {
+    return this.globalData.myGyms || []
   }
 })

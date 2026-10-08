@@ -14,11 +14,15 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const _ = db.command
+
+/* 超管手机号名单（与 login 云函数保持一致） */
+const SUPER_ADMIN_PHONES = ['17611028882']
 
 const ok = (data) => ({ code: 0, data, message: 'ok' })
 const fail = (message, code = 1) => ({ code, data: null, message })
 
-const COLLECTIONS = ['users', 'course', 'order', 'package', 'signin', 'notice', 'hourslog']
+const COLLECTIONS = ['users', 'course', 'order', 'package', 'signin', 'notice', 'hourslog', 'gyms', 'invitations', 'gym_members']
 
 const WEEK_TEXT = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
@@ -108,8 +112,8 @@ async function seed(force) {
   // 公告
   if (force || (await db.collection('notice').count()).total === 0) {
     const notices = [
-      { title: '欢迎来到瑜伽馆', content: '首次使用请先在「我的 → 课时套餐」了解套餐，联系馆主开通课时后即可预约课程。', createTime: Date.now(), updateTime: Date.now() },
-      { title: '温馨提示', content: '请提前 10 分钟到馆，自备瑜伽垫与水杯；如无法到课请提前在「我的预约」中取消，方便其他会员预约。', createTime: Date.now() - 86400000, updateTime: Date.now() - 86400000 }
+      { gymId: '', title: '欢迎来到瑜伽馆', content: '首次使用请先在「我的 → 课时套餐」了解套餐，联系馆主开通课时后即可预约课程。', createTime: Date.now(), updateTime: Date.now() },
+      { gymId: '', title: '温馨提示', content: '请提前 10 分钟到馆，自备瑜伽垫与水杯；如无法到课请提前在「我的预约」中取消，方便其他会员预约。', createTime: Date.now() - 86400000, updateTime: Date.now() - 86400000 }
     ]
     for (const n of notices) {
       await db.collection('notice').add({ data: n })
@@ -144,20 +148,126 @@ async function setAdmin(openid) {
   return 1
 }
 
+/* ==================== 默认馆迁移（多馆平台升级，幂等可重复执行） ==================== */
+const DEFAULT_GYM_NAME = '悦己瑜伽（默认馆）'
+
+async function migrate() {
+  const result = { gym: '', ownerSet: false, updated: { course: 0, order: 0, package: 0, notice: 0, signin: 0, hourslog: 0, userPackages: 0 } }
+
+  // 1. 找到或创建默认馆
+  let gymRes = await db.collection('gyms').where({ name: DEFAULT_GYM_NAME }).get()
+  let gym = gymRes.data[0]
+  if (!gym) {
+    const now = Date.now()
+    const added = await db.collection('gyms').add({
+      data: {
+        name: DEFAULT_GYM_NAME,
+        city: '北京',
+        address: '',
+        phone: '',
+        images: [],
+        desc: '系统迁移生成的默认场馆',
+        status: 'active',
+        ownerOpenid: '',
+        locateEnabled: false,
+        latitude: 0,
+        longitude: 0,
+        courseCount: 0,
+        createTime: now,
+        updateTime: now
+      }
+    })
+    gym = { _id: added._id }
+    result.gym = added._id
+  } else {
+    result.gym = gym._id
+  }
+  const gymId = gym._id
+
+  // 2. 存量数据回填 gymId（只更新没有 gymId 字段的记录）
+  for (const col of ['course', 'order', 'package', 'notice', 'signin', 'hourslog']) {
+    const updated = await db
+      .collection(col)
+      .where({ gymId: _.exists(false) })
+      .update({ data: { gymId } })
+    result.updated[col] = updated.stats ? updated.stats.updated : 0
+  }
+
+  // 2.5 预约记录回填/修正 dateKey（以课程快照时间为准；老回填可能误用了 createTime）
+  const ordersAll = await db.collection('order').limit(1000).get()
+  const p2 = (n) => (n < 10 ? '0' + n : '' + n)
+  const keyFromTime = (ts) => {
+    const d = new Date(ts)
+    return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`
+  }
+  for (const o of ordersAll.data || []) {
+    // 优先课程快照里的日期字符串，其次 startTime 时间戳
+    const fromStr = o.startTimeStr ? String(o.startTimeStr).split(' ')[0] : ''
+    const correctKey = fromStr || (o.startTime ? keyFromTime(o.startTime) : '')
+    if (correctKey && o.dateKey !== correctKey) {
+      await db.collection('order').doc(o._id).update({ data: { dateKey: correctKey } })
+      result.updated.orderDateKeys = (result.updated.orderDateKeys || 0) + 1
+    }
+  }
+
+  // 3. users.packages 内嵌套餐回填 gymId（逐用户处理）
+  const usersRes = await db.collection('users').limit(1000).get()
+  for (const u of usersRes.data) {
+    const packs = u.packages || []
+    const need = packs.some((p) => !p.gymId)
+    if (need) {
+      const newPacks = packs.map((p) => (p.gymId ? p : Object.assign({}, p, { gymId })))
+      await db
+        .collection('users')
+        .doc(u._id)
+        .update({ data: { packages: newPacks, updateTime: Date.now() } })
+      result.updated.userPackages++
+    }
+
+    // 4. 角色修正（幂等，可重复执行）：
+    //    手机号命中超管名单（无论当前是 admin 还是 owner）→ superadmin，并摘除名下场馆
+    //    其余 admin → 默认馆馆主
+    if (u.phone && SUPER_ADMIN_PHONES.indexOf(u.phone) > -1) {
+      if (u.role !== 'superadmin') {
+        await db.collection('users').doc(u._id).update({ data: { role: 'superadmin', updateTime: Date.now() } })
+        await db
+          .collection('gyms')
+          .where({ ownerOpenid: u.openid })
+          .update({ data: { ownerOpenid: '', updateTime: Date.now() } })
+        result.superAdminFixed = true
+      }
+    } else if (u.role === 'admin') {
+      await db.collection('users').doc(u._id).update({ data: { role: 'owner', updateTime: Date.now() } })
+      await db.collection('gyms').doc(gymId).update({ data: { ownerOpenid: u.openid, updateTime: Date.now() } })
+      result.ownerSet = true
+    }
+  }
+
+  // 5. courseCount 统计
+  const cnt = await db.collection('course').where({ gymId }).count()
+  await db.collection('gyms').doc(gymId).update({ data: { courseCount: cnt.total, updateTime: Date.now() } })
+
+  return result
+}
+
 exports.main = async (event) => {
   try {
+    // 数据迁移（独立 action，幂等）
+    if (event.action === 'migrate') {
+      const migrated = await migrate()
+      return ok({ migrated })
+    }
+
     const collections = await ensureCollections()
     const seeded = await seed(!!event.forceSeed)
-    let adminSet = 0
-    if (event.setAdminOpenid) {
-      adminSet = await setAdmin(String(event.setAdminOpenid).trim())
-    }
+    // run 时顺带执行一次迁移（幂等，重复执行无副作用）
+    const migrated = await migrate()
 
     return ok({
       createdCollections: collections,
       seeded,
-      adminSet: adminSet > 0,
-      tip: event.setAdminOpenid ? '管理员已设置' : '如需设置管理员，可在调用时传入 setAdminOpenid'
+      migrated,
+      tip: '集合、演示数据与默认馆迁移均已完成'
     })
   } catch (err) {
     console.error('[init] 执行出错', err)

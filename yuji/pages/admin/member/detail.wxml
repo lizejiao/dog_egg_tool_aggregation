@@ -23,6 +23,8 @@
       <view class="btn btn-danger flex-1" bindtap="onDeductHours">扣减课时</view>
       <view class="btn btn-ghost flex-1" bindtap="onRecharge">开通套餐</view>
     </view>
+    <!-- 数据修正：全局余额 + 馆账本全部清零 -->
+    <view class="md-reset" bindtap="onResetHours">课时清零（数据修正）</view>
   </view>
 
   <!-- 已购套餐 -->

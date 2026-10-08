@@ -24,13 +24,20 @@ function bizErr(message, code = 1) {
 async function assertAdmin(openid) {
   const res = await db.collection('users').where({ openid }).get()
   const user = res.data[0]
-  if (!user || user.role !== 'admin') throw bizErr('无权限操作，仅管理员可用', 403)
+  const role = (user && user.role) || ''
+  if (!user || ['owner', 'superadmin', 'admin'].indexOf(role) === -1) throw bizErr('无权限操作，仅管理员可用', 403)
   return user
 }
 
 async function list(event) {
   const limit = Math.min(parseInt(event.limit, 10) || 5, 20)
-  const res = await db.collection('notice').orderBy('createTime', 'desc').limit(limit).get()
+  const _ = db.command
+  // gymId 过滤：传了就只看该馆公告 + 平台公告（gymId 为空）
+  let where = {}
+  if (event.gymId) {
+    where = _.or([{ gymId: event.gymId }, { gymId: '' }])
+  }
+  const res = await db.collection('notice').where(where).orderBy('createTime', 'desc').limit(limit).get()
   return ok({ list: res.data })
 }
 
@@ -41,7 +48,14 @@ async function create(event, openid) {
   if (!content) throw bizErr('请填写公告内容')
 
   await db.collection('notice').add({
-    data: { title, content, createTime: Date.now(), updateTime: Date.now(), creatorOpenid: openid }
+    data: {
+      title,
+      content,
+      gymId: String(event.gymId || '').trim(), // 空 = 平台公告
+      createTime: Date.now(),
+      updateTime: Date.now(),
+      creatorOpenid: openid
+    }
   })
   return ok({})
 }

@@ -1,0 +1,110 @@
+/* 城市选择器组件 */
+.city-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 999;
+}
+
+.city-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 30rpx 30rpx 40rpx;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.city-panel__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text, #333);
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+/* 搜索框 */
+.city-search {
+  display: flex;
+  align-items: center;
+  background-color: #F6F4F1;
+  border-radius: 999rpx;
+  padding: 14rpx 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.city-search__icon {
+  font-size: 24rpx;
+  margin-right: 12rpx;
+}
+
+.city-search__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  color: var(--text, #333);
+}
+
+.city-search__placeholder {
+  color: var(--text-weak, #BBB);
+}
+
+/* 关键：scroll-view 必须给固定高度才能滚动（flex 高度在小程序不生效） */
+.city-panel__scroll {
+  height: 56vh;
+}
+
+.city-empty {
+  text-align: center;
+  padding: 80rpx 0;
+  font-size: 25rpx;
+  color: var(--text-sub, #999);
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.city-panel__sub {
+  font-size: 24rpx;
+  color: var(--text-sub, #999);
+  margin: 10rpx 0 14rpx;
+}
+
+.city-panel__letter {
+  font-size: 24rpx;
+  color: var(--primary-dark, #79927A);
+  font-weight: 600;
+  margin: 20rpx 0 12rpx;
+}
+
+.city-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.city-grid__item {
+  width: 21%;
+  margin: 1.5%;
+  padding: 14rpx 0;
+  text-align: center;
+  font-size: 25rpx;
+  color: var(--text, #333);
+  background-color: #F6F4F1;
+  border-radius: 12rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+.city-grid__item--on {
+  background-color: var(--primary, #8FA68E);
+  color: #FFFFFF;
+  font-weight: 600;
+}

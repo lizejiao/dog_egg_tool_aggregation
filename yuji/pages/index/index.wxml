@@ -1,50 +1,289 @@
-<!-- 首页：公告 + 近期课程列表 -->
+<!-- 首页（角色化视图） -->
 <view class="page">
-  <!-- 顶部问候 -->
-  <view class="hero">
-    <view class="hero__hello">{{greeting}}</view>
-    <view class="hero__sub">给身体一点时间，慢慢来</view>
-    <view class="hero__card" wx:if="{{user}}">
-      <view class="hero__card-label">剩余课时</view>
-      <view class="hero__card-num">{{user.balance}}</view>
-      <view class="hero__card-unit">课时</view>
+  <!-- ==================== 游客 / 学员视图：附近瑜伽馆 ==================== -->
+  <block wx:if="{{role === 'guest' || role === 'student'}}">
+    <!-- 城市栏 + 问候 -->
+    <view class="city-bar">
+      <view class="city-bar__left">
+        <view class="hero__hello">{{greeting}}</view>
+        <view class="hero__sub">找到身边的好瑜伽馆</view>
+      </view>
+      <view class="city-bar__picker" bindtap="openCityPicker">
+        <text class="city-bar__icon">📍</text>{{city}}<text class="city-bar__arrow">▾</text>
+      </view>
     </view>
-  </view>
 
-  <!-- 公告轮播 -->
-  <view class="notice" wx:if="{{notices.length}}" bindtap="onNoticeTap">
-    <view class="notice__badge">公告</view>
-    <swiper
-      class="notice__swiper"
-      vertical
-      autoplay
-      circular
-      interval="4000"
-      duration="600"
-      current="{{noticeIndex}}"
-      bindchange="onNoticeChange"
-    >
-      <swiper-item wx:for="{{notices}}" wx:key="_id">
-        <view class="notice__item">{{item.title}}</view>
-      </swiper-item>
-    </swiper>
-    <view class="notice__arrow">›</view>
-  </view>
+    <!-- 学员：剩余课时提示条 -->
+    <view class="balance-bar" wx:if="{{role === 'student' && user}}" bindtap="goMine">
+      <text>剩余课时 {{user.balance || 0}} · 去「我的」查看详情</text>
+      <text class="balance-bar__arrow">›</text>
+    </view>
 
-  <!-- 课程列表 -->
-  <view class="group-title">近期课程</view>
+    <!-- 学员：已加入的瑜伽馆 -->
+    <block wx:if="{{role === 'student' && joinedGyms.length}}">
+      <view class="group-title">已加入的瑜伽馆</view>
+      <view
+        class="gym-card"
+        wx:for="{{joinedGyms}}"
+        wx:key="_id"
+        data-id="{{item._id}}"
+        bindtap="onGymTap"
+        hover-class="gym-card--hover"
+      >
+        <view class="gym-card__icon">🧘</view>
+        <view class="gym-card__body">
+          <view class="gym-card__name">{{item.name}}<text class="gym-card__joined-tag">已加入</text></view>
+          <view class="gym-card__meta">
+            <view class="tag tag-green">{{item.city}}</view>
+            <text class="gym-card__count" wx:if="{{item.courseCount}}">{{item.courseCount}} 节在排课程</text>
+          </view>
+          <view class="gym-card__addr" wx:if="{{item.address}}">{{item.city}}{{item.address}}</view>
+        </view>
+        <view class="gym-card__arrow">›</view>
+      </view>
+    </block>
 
-  <block wx:if="{{courses.length}}">
-    <course-card
-      wx:for="{{courses}}"
-      wx:key="_id"
-      course="{{item}}"
-      data-id="{{item._id}}"
-      bindselect="onCourseTap"
-    />
-    <view class="load-more" wx:if="{{finished}}">— 已经到底啦 —</view>
-    <view class="load-more" wx:elif="{{loadingMore}}">加载中…</view>
+    <!-- 未加入的瑜伽馆（游客看这里全部） -->
+    <view class="group-title" wx:if="{{role === 'student' && joinedGyms.length}}">其他瑜伽馆 · {{city}}</view>
+    <view class="group-title" wx:else>附近瑜伽馆 · {{city}}</view>
+
+    <block wx:if="{{otherGyms.length || (role === 'guest' && gyms.length)}}">
+      <view
+        class="gym-card"
+        wx:for="{{role === 'guest' ? gyms : otherGyms}}"
+        wx:key="_id"
+        data-id="{{item._id}}"
+        bindtap="onGymTap"
+        hover-class="gym-card--hover"
+      >
+        <view class="gym-card__icon">🧘</view>
+        <view class="gym-card__body">
+          <view class="gym-card__name">{{item.name}}</view>
+          <view class="gym-card__meta">
+            <view class="tag tag-green">{{item.city}}</view>
+            <text class="gym-card__count" wx:if="{{item.courseCount}}">{{item.courseCount}} 节在排课程</text>
+          </view>
+          <view class="gym-card__addr" wx:if="{{item.address}}">{{item.city}}{{item.address}}</view>
+        </view>
+        <view class="gym-card__arrow">›</view>
+      </view>
+    </block>
+    <block wx:elif="{{role === 'student' && joinedGyms.length}}">
+      <view class="load-more">该城市暂无其他瑜伽馆</view>
+    </block>
+
+    <empty wx:elif="{{!gymLoading}}" icon="🏛️" title="{{city}}还没有入驻瑜伽馆" sub="换个城市看看，或邀请身边的瑜伽馆入驻" />
+
+    <view class="footer-tip" wx:if="{{role === 'guest'}}">游客浏览中 · 进入「我的」可登录使用预约功能</view>
   </block>
 
-  <empty wx:elif="{{!loading}}" icon="🌿" title="近期暂无排课" sub="馆主排课后会第一时间展示在这里" />
+  <!-- ==================== 馆主视图 ==================== -->
+  <block wx:if="{{role === 'owner' || role === 'admin'}}">
+    <view class="ah-hero">
+      <view class="ah-hero__title">{{myGym.name || '馆主工作台'}}</view>
+      <view class="ah-hero__sub">今日经营一览</view>
+      <view class="ah-stats">
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{todayStats.courses}}</view>
+          <view class="ah-stats__label">今日课节</view>
+        </view>
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{todayStats.booked}}</view>
+          <view class="ah-stats__label">待上课预约</view>
+        </view>
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{todayStats.signed}}</view>
+          <view class="ah-stats__label">今日已签到</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加入申请（有待审批时展示） -->
+    <block wx:if="{{joinRequests.length}}">
+      <view class="group-title">加入申请 <view class="menu-badge">{{joinRequests.length}}</view></view>
+      <view class="card">
+        <view class="jr-item" wx:for="{{joinRequests}}" wx:key="_id">
+          <view class="jr-item__info">
+            <view class="jr-item__name">{{item.nickName}}</view>
+            <view class="jr-item__phone" wx:if="{{item.phone}}">{{item.phone}}</view>
+          </view>
+          <view class="jr-item__ops">
+            <view class="jr-btn jr-btn--ghost" data-id="{{item._id}}" bindtap="onRejectJoin">拒绝</view>
+            <view class="jr-btn" data-id="{{item._id}}" bindtap="onApproveJoin">同意</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 预约课程（全部待上课，按天分组） -->
+    <view class="group-title-row">
+      <view class="group-title group-title--flex">预约课程</view>
+      <view class="link" bindtap="goOrders">全部 ›</view>
+    </view>
+
+    <block wx:if="{{todayGroups.length}}">
+      <view class="card" wx:for="{{todayGroups}}" wx:key="key" wx:for-item="day">
+        <view class="tg-group" wx:for="{{day.groups}}" wx:key="courseId" wx:for-item="g">
+          <view class="tg-group__head">
+            <view class="tg-group__time">{{g.dateText}} {{g.timeText}}</view>
+            <view class="tg-group__name">
+              {{g.courseName}}<text wx:if="{{g.teacher}}" class="tg-group__teacher"> · {{g.teacher}}</text>
+            </view>
+            <view class="tg-group__count">{{g.signed}}/{{g.total}}</view>
+          </view>
+          <view class="tg-member" wx:for="{{g.members}}" wx:key="orderId" wx:for-item="m">
+            <text class="tg-member__name">{{m.nickName}}</text>
+            <text wx:if="{{m.phone}}" class="tg-member__phone">{{m.phone}}</text>
+            <view class="tag {{m.status === 'signed' ? 'tag-green' : 'tag-orange'}}">{{m.statusText}}</view>
+          </view>
+        </view>
+      </view>
+    </block>
+    <empty wx:else icon="🌿" title="暂无待上课预约" sub="会员预约后会展示在这里" />
+
+    <!-- 本馆近期课程 -->
+    <view class="group-title-row">
+      <view class="group-title group-title--flex">本馆近期课程</view>
+      <view class="link" bindtap="goCourseManage">管理 ›</view>
+    </view>
+    <block wx:if="{{ownerCourses.length}}">
+      <course-card
+        wx:for="{{ownerCourses}}"
+        wx:key="_id"
+        course="{{item}}"
+        data-id="{{item._id}}"
+        bindselect="onCourseTap"
+      />
+    </block>
+    <empty wx:else icon="📅" title="本馆暂无排课" sub="点击右上角管理去排课吧" />
+
+    <view class="card card--flat">
+      <view class="menu-item menu-item--muted" bindtap="goAdminHome">
+        <view class="menu-item__left">馆主管理后台</view>
+        <view class="menu-item__arrow"></view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ==================== 超管视图 ==================== -->
+  <block wx:if="{{role === 'superadmin'}}">
+    <view class="ah-hero">
+      <view class="ah-hero__title">平台管理</view>
+      <view class="ah-hero__sub">全平台运营一览</view>
+      <view class="ah-stats">
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{platform.gyms}}</view>
+          <view class="ah-stats__label">场馆</view>
+        </view>
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{platform.owners}}</view>
+          <view class="ah-stats__label">已任命馆主</view>
+        </view>
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{platform.students}}</view>
+          <view class="ah-stats__label">注册学员</view>
+        </view>
+        <view class="ah-stats__item">
+          <view class="ah-stats__num">{{platform.todayOrders}}</view>
+          <view class="ah-stats__label">待上课预约</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 创建场馆 -->
+    <button class="btn-primary super-create-btn" bindtap="goCreateGym">＋ 创建场馆</button>
+    <view class="form-tip-super">创建后可在下方场馆列表中授权馆主</view>
+
+    <!-- 场馆列表 -->
+    <view class="group-title">全部场馆</view>
+    <view class="card" wx:if="{{gymList.length}}">
+      <view class="super-gym-row" wx:for="{{gymList}}" wx:key="_id">
+        <view class="menu-item super-gym-row__main" data-id="{{item._id}}" bindtap="goEditGym">
+          <view class="menu-item__left">
+            {{item.name}}
+            <text class="tg-group__teacher"> · {{item.city}}</text>
+            <view class="tag tag-orange" wx:if="{{item.status === 'closed'}}" style="margin-left: 8rpx;">已关闭</view>
+          </view>
+          <view class="super-owner-info">
+            <view class="super-owner-name" wx:if="{{item.ownerOpenid}}">馆主：{{item.ownerName}}</view>
+            <view class="tag {{item.ownerOpenid ? 'tag-green' : 'tag-gray'}}">{{item.ownerOpenid ? '已任命' : '待任命'}}</view>
+          </view>
+        </view>
+        <view class="super-gym-row__ops">
+          <view class="super-op super-op--plain" data-id="{{item._id}}" data-closed="{{item.status === 'closed'}}" bindtap="goGymDetail">预约课程</view>
+          <view class="super-op" data-id="{{item._id}}" bindtap="onAssignOwner">
+            {{item.ownerOpenid ? '更换馆主' : '授权馆主'}}
+          </view>
+          <view class="super-op super-op--warn" data-id="{{item._id}}" data-closed="{{item.status === 'closed'}}" bindtap="onToggleGymStatus">
+            {{item.status === 'closed' ? '重开' : '关闭'}}
+          </view>
+        </view>
+      </view>
+    </view>
+    <empty wx:else icon="🏛️" title="还没有场馆" sub="点击上方按钮创建第一个场馆" />
+
+    <view class="footer-tip">超级管理员 · 平台运营视图</view>
+  </block>
 </view>
+
+<!-- 授权馆主：用户选择弹层（超管） -->
+<view class="city-mask" wx:if="{{ownerPickerShow}}" bindtap="closeOwnerPicker">
+  <view class="city-panel" catchtap="stopPropagation">
+    <view class="city-panel__title">
+      {{ownerPickerGym.ownerOpenid ? '更换馆主' : '授权馆主'}}
+      <text class="op-gym-name"> · {{ownerPickerGym.name}}</text>
+    </view>
+
+    <!-- 搜索框 -->
+    <view class="city-search">
+      <text class="city-search__icon">🔍</text>
+      <input
+        class="city-search__input"
+        value="{{ownerKeyword}}"
+        bindinput="onOwnerSearchInput"
+        placeholder="搜索昵称 / 手机号，空=全部用户"
+        placeholder-class="city-search__placeholder"
+        confirm-type="search"
+      />
+    </view>
+
+    <scroll-view class="city-panel__scroll" scroll-y>
+      <view class="op-loading" wx:if="{{userLoading}}">加载中…</view>
+
+      <block wx:elif="{{userList.length}}">
+        <view
+          class="op-user"
+          wx:for="{{userList}}"
+          wx:key="_id"
+          data-openid="{{item.openid}}"
+          data-name="{{item.nickName}}"
+          data-superadmin="{{item.isSuperAdmin}}"
+          bindtap="onPickUser"
+          hover-class="op-user--hover"
+        >
+          <image class="op-user__avatar" src="{{item.avatarUrl}}" mode="aspectFill" wx:if="{{item.avatarUrl}}" />
+          <view class="op-user__avatar op-user__avatar--ph" wx:else>🧑</view>
+          <view class="op-user__info">
+            <view class="op-user__name">
+              {{item.nickName}}
+              <view class="tag tag-rose" wx:if="{{item.isSuperAdmin}}">超管</view>
+              <view class="tag tag-blue" wx:elif="{{item.role === 'owner'}}">馆主</view>
+            </view>
+            <view class="op-user__phone" wx:if="{{item.phone}}">{{item.phone}}</view>
+          </view>
+          <view class="op-user__pick">授权</view>
+        </view>
+      </block>
+
+      <view class="op-loading" wx:else>没有找到用户</view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- 城市选择器组件 -->
+<city-picker
+  show="{{cityPickerShow}}"
+  city="{{city}}"
+  bindselect="onCitySelectEvent"
+  bindclose="closeCityPicker"
+/>

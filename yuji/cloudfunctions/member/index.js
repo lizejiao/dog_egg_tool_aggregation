@@ -28,7 +28,8 @@ function bizErr(message, code = 1) {
 async function assertAdmin(openid) {
   const res = await db.collection('users').where({ openid }).get()
   const user = res.data[0]
-  if (!user || user.role !== 'admin') throw bizErr('无权限操作，仅管理员可用', 403)
+  const role = (user && user.role) || ''
+  if (!user || ['owner', 'superadmin', 'admin'].indexOf(role) === -1) throw bizErr('无权限操作，仅管理员可用', 403)
   return user
 }
 
@@ -58,7 +59,59 @@ async function list(event) {
   const limit = Math.min(parseInt(event.limit, 10) || 20, 100)
   const skip = parseInt(event.skip, 10) || 0
   const keyword = String(event.keyword || '').trim()
+  const gymId = String(event.gymId || '').trim()
 
+  // 指定了场馆：只返回已加入（approved）该馆的会员
+  if (gymId) {
+    let memberRes = await db
+      .collection('gym_members')
+      .where({ gymId, status: 'approved' })
+      .orderBy('createTime', 'desc')
+      .limit(100)
+      .get()
+    let members = memberRes.data || []
+
+    // 关键词过滤（昵称/手机号）
+    if (keyword) {
+      const openids = members.map((m) => m.openid)
+      if (!openids.length) return ok({ total: 0, list: [] })
+      const re = db.RegExp({ regexp: escapeReg(keyword), options: 'i' })
+      const usersRes = await db
+        .collection('users')
+        .where(_.and([{ openid: _.in(openids) }, _.or([{ nickName: re }, { phone: re }])]))
+        .get()
+      const kwSet = {}
+      ;(usersRes.data || []).forEach((u) => {
+        kwSet[u.openid] = u
+      })
+      members = members.filter((m) => kwSet[m.openid])
+    }
+
+    // 拉用户资料
+    const openids = members.map((m) => m.openid)
+    let userMap = {}
+    if (openids.length) {
+      const usersRes = await db.collection('users').where({ openid: _.in(openids) }).limit(100).get()
+      userMap = (usersRes.data || []).reduce((m2, u) => {
+        m2[u.openid] = u
+        return m2
+      }, {})
+    }
+
+    const list = members
+      .filter((m) => userMap[m.openid])
+      .map((m) => {
+        const u = userMap[m.openid]
+        return Object.assign({}, maskUser(u), {
+          joinedAt: m.createTime,
+          gymRole: 'member'
+        })
+      })
+
+    return ok({ total: list.length, list: list.slice(skip, skip + limit) })
+  }
+
+  // 未指定场馆（超管视角）：全部注册用户
   let where = {}
   if (keyword) {
     const re = db.RegExp({ regexp: escapeReg(keyword), options: 'i' })
@@ -102,6 +155,17 @@ async function adjust(event, adminOpenid) {
   if (!amount || isNaN(amount)) throw bizErr('请输入需要调整的课时数')
   if (Math.abs(amount) > 200) throw bizErr('单次调整不能超过 200 课时')
 
+  // 服务端自动解析课时归属馆：
+  //   操作者是馆主 → 其名下场馆（一人多馆暂取第一个）
+  //   操作者是超管 → 不归属具体馆（全局）
+  const adminRes = await db.collection('users').where({ openid: adminOpenid }).get()
+  const adminUser = adminRes.data[0]
+  let gymId = String(event.gymId || '').trim()
+  if (!gymId && adminUser && adminUser.role === 'owner') {
+    const gymRes = await db.collection('gyms').where({ ownerOpenid: adminOpenid }).limit(1).get()
+    if (gymRes.data && gymRes.data.length) gymId = gymRes.data[0]._id
+  }
+
   const now = Date.now()
   const transaction = await db.startTransaction()
   try {
@@ -114,10 +178,43 @@ async function adjust(event, adminOpenid) {
       throw bizErr(`课时不足：当前剩余 ${user.balance || 0} 课时，无法扣减 ${-amount} 课时`)
     }
 
+    // 课时包账本操作（按馆隔离的核心）：
+    //   增加 + 有归属馆 → 新增一条该馆的课时包记录
+    //   扣减 → 从课时包里按「最早到期优先」扣，扣完不够再扣「无归属的裸课时」
+    const packages = (user.packages || []).map((p) => Object.assign({}, p))
+
+    if (amount > 0 && gymId) {
+      packages.push({
+        gymId,
+        packageId: '',
+        name: reason || '手动增加',
+        totalHours: amount,
+        usedHours: 0,
+        price: 0,
+        validDays: 0,
+        boughtAt: now,
+        expireAt: 0 // 长期有效
+      })
+    } else if (amount < 0) {
+      // 扣减：按到期先后顺序扣各馆课时包
+      let remain = -amount
+      const sorted = packages
+        .filter((p) => (p.usedHours || 0) < (p.totalHours || 0))
+        .sort((a, b) => (a.expireAt || Infinity) - (b.expireAt || Infinity))
+      for (const p of sorted) {
+        if (remain <= 0) break
+        const avail = (p.totalHours || 0) - (p.usedHours || 0)
+        const take = Math.min(avail, remain)
+        p.usedHours = (p.usedHours || 0) + take
+        remain -= take
+      }
+      // 账本不够扣时静默通过（全局 balance 已校验过不会为负；差额是历史无归属课时）
+    }
+
     await transaction
       .collection('users')
       .doc(user._id)
-      .update({ data: { balance: newBalance, updateTime: now } })
+      .update({ data: { balance: newBalance, packages, updateTime: now } })
 
     await transaction.collection('hourslog').add({
       data: {
@@ -127,6 +224,7 @@ async function adjust(event, adminOpenid) {
         amount,
         balanceAfter: newBalance,
         reason,
+        gymId,
         operatorOpenid: adminOpenid,
         createTime: now,
         dateKey: todayKey(now)
@@ -134,7 +232,8 @@ async function adjust(event, adminOpenid) {
     })
 
     await transaction.commit()
-    return ok({ balance: newBalance })
+    // gymId 写入成功与否直接可见，方便排查
+    return ok({ balance: newBalance, gymId: gymId || '', gymWritten: !!(amount > 0 && gymId) })
   } catch (e) {
     await transaction.rollback()
     throw e
@@ -144,13 +243,24 @@ async function adjust(event, adminOpenid) {
 /* ==================== 为会员开通课时套餐 ==================== */
 async function recharge(event, adminOpenid) {
   const openid = String(event.openid || '')
-  if (!openid) throw bizErr('缺少会员 openid')
   if (!event.packageId) throw bizErr('请选择课时套餐')
 
   const now = Date.now()
   const pkgRes = await db.collection('package').doc(event.packageId).get()
   const pkg = pkgRes.data
   if (!pkg) throw bizErr('套餐不存在或已删除')
+
+  // 服务端自动解析归属馆：套餐本身有 gymId 用套餐的（该馆定义的套餐）；
+  // 否则操作者是馆主 → 名下场馆；超管 → 不归属
+  let gymId = pkg.gymId || ''
+  if (!gymId) {
+    const adminRes = await db.collection('users').where({ openid: adminOpenid }).get()
+    const adminUser = adminRes.data[0]
+    if (adminUser && adminUser.role === 'owner') {
+      const gymRes = await db.collection('gyms').where({ ownerOpenid: adminOpenid }).limit(1).get()
+      if (gymRes.data && gymRes.data.length) gymId = gymRes.data[0]._id
+    }
+  }
 
   const transaction = await db.startTransaction()
   try {
@@ -161,6 +271,7 @@ async function recharge(event, adminOpenid) {
     // 套餐有效期：validDays 天，0 表示长期有效
     const expireAt = pkg.validDays > 0 ? now + pkg.validDays * 86400000 : 0
     const entry = {
+      gymId, // 归属馆（按馆隔离展示/扣减）
       packageId: pkg._id,
       name: pkg.name,
       totalHours: pkg.totalHours,
@@ -187,6 +298,7 @@ async function recharge(event, adminOpenid) {
         amount: pkg.totalHours,
         balanceAfter: newBalance,
         reason: `购买套餐：${pkg.name}`,
+        gymId,
         operatorOpenid: adminOpenid,
         createTime: now,
         dateKey: todayKey(now)
@@ -194,7 +306,56 @@ async function recharge(event, adminOpenid) {
     })
 
     await transaction.commit()
-    return ok({ balance: newBalance })
+    return ok({ balance: newBalance, gymId: gymId || '', gymWritten: !!gymId })
+  } catch (e) {
+    await transaction.rollback()
+    throw e
+  }
+}
+
+/* ==================== 课时清零（数据修正用） ==================== */
+async function resetHours(event, adminOpenid) {
+  const openid = String(event.openid || '')
+  if (!openid) throw bizErr('缺少会员 openid')
+
+  const now = Date.now()
+  const transaction = await db.startTransaction()
+  try {
+    const userRes = await transaction.collection('users').where({ openid }).get()
+    const user = userRes.data[0]
+    if (!user) throw bizErr('会员不存在')
+
+    const before = {
+      balance: user.balance || 0,
+      packages: (user.packages || []).map((p) => ({
+        gymId: p.gymId || '',
+        name: p.name || '',
+        remain: Math.max(0, (p.totalHours || 0) - (p.usedHours || 0))
+      }))
+    }
+
+    // 全局余额清零 + 清空所有课时包（馆账本一并清除）
+    await transaction
+      .collection('users')
+      .doc(user._id)
+      .update({ data: { balance: 0, packages: [], updateTime: now } })
+
+    await transaction.collection('hourslog').add({
+      data: {
+        openid,
+        nickName: user.nickName || '',
+        type: 'reset',
+        amount: -before.balance,
+        balanceAfter: 0,
+        reason: String(event.reason || '').trim().slice(0, 50) || '数据修正：课时清零',
+        operatorOpenid: adminOpenid,
+        createTime: now,
+        dateKey: todayKey(now)
+      }
+    })
+
+    await transaction.commit()
+    return ok({ before, after: { balance: 0, packages: [] } })
   } catch (e) {
     await transaction.rollback()
     throw e
@@ -283,6 +444,9 @@ exports.main = async (event) => {
       case 'recharge':
         await assertAdmin(OPENID)
         return await recharge(event, OPENID)
+      case 'resetHours':
+        await assertAdmin(OPENID)
+        return await resetHours(event, OPENID)
       case 'stats':
         await assertAdmin(OPENID)
         return await stats()

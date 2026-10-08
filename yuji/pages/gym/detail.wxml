@@ -1,0 +1,107 @@
+<!-- 馆详情：馆信息 + 公告 + 近期课程表 -->
+<view class="page" wx:if="{{gym}}">
+  <!-- 场馆信息头 -->
+  <view class="gym-hero">
+    <view class="gym-hero__name">{{gym.name}}</view>
+    <view class="gym-hero__meta">
+      <view class="tag tag-green">{{gym.city}}</view>
+      <view class="gym-hero__meta-item" wx:if="{{gym.courseCount}}">{{gym.courseCount}} 节在排课程</view>
+      <!-- 该馆剩余课时（已加入会员显示） -->
+      <view class="gym-hero__balance" wx:if="{{gym.isJoined && gymBalance !== null}}">
+        <text class="gym-hero__balance-num">{{gymBalance}}</text> 剩余课时
+      </view>
+    </view>
+    <view class="gym-hero__addr" wx:if="{{gym.address}}">
+      <text class="gym-hero__addr-icon">📍</text>{{gym.city}}{{gym.address}}
+    </view>
+    <view class="gym-hero__desc" wx:if="{{gym.desc}}">{{gym.desc}}</view>
+
+    <view class="gym-hero__actions">
+      <button class="gym-btn" bindtap="onCallPhone">电话咨询</button>
+      <button class="gym-btn gym-btn--primary" bindtap="onViewMap" wx:if="{{gym.locateEnabled}}">查看位置</button>
+      <button
+        wx:if="{{!gym.isJoined && !gym.isPending}}"
+        class="gym-btn gym-btn--primary"
+        bindtap="onToggleJoin"
+      >申请加入</button>
+      <button
+        wx:elif="{{gym.isPending}}"
+        class="gym-btn gym-btn--pending"
+        bindtap="onToggleJoin"
+      >审核中，点击撤回</button>
+      <button
+        wx:else
+        class="gym-btn gym-btn--joined"
+        bindtap="onToggleJoin"
+      >已学课程 ({{historyCount}})</button>
+    </view>
+  </view>
+
+  <!-- 场馆公告 -->
+  <view class="notice" wx:if="{{notices.length}}" bindtap="onNoticeTap">
+    <view class="notice__badge">公告</view>
+    <swiper
+      class="notice__swiper"
+      vertical
+      autoplay
+      circular
+      interval="4000"
+      duration="600"
+    >
+      <swiper-item wx:for="{{notices}}" wx:key="_id">
+        <view class="notice__item">{{item.title}}</view>
+      </swiper-item>
+    </swiper>
+    <view class="notice__arrow">›</view>
+  </view>
+
+  <!-- 近期课程 -->
+  <view class="group-title">近期课程</view>
+
+  <block wx:if="{{courses.length}}">
+    <course-card
+      wx:for="{{courses}}"
+      wx:key="_id"
+      course="{{item}}"
+      data-id="{{item._id}}"
+      bindselect="onCourseTap"
+    />
+    <view class="load-more" wx:if="{{finished}}">— 已经到底啦 —</view>
+    <view class="load-more" wx:elif="{{loadingMore}}">加载中…</view>
+  </block>
+
+  <empty wx:elif="{{!loading}}" icon="🌿" title="近期暂无排课" sub="馆主排课后会第一时间展示在这里" />
+</view>
+
+<view class="page" wx:elif="{{!loading}}">
+  <empty icon="🏛️" title="场馆不存在或已关闭" sub="换个场馆看看吧" />
+</view>
+
+<!-- 已学课程弹层 -->
+<view class="city-mask" wx:if="{{historyShow}}" bindtap="onCloseHistory">
+  <view class="history-panel" catchtap="stopPropagation">
+    <view class="history-panel__title">已学课程 · {{historyList.length}} 节</view>
+    <scroll-view class="history-panel__scroll" scroll-y>
+      <view class="op-loading" wx:if="{{historyLoading}}">加载中…</view>
+
+      <block wx:elif="{{historyList.length}}">
+        <view class="history-item" wx:for="{{historyList}}" wx:key="_id">
+          <view class="history-item__time">{{item.startTimeStr}}</view>
+          <view class="history-item__body">
+            <view class="history-item__name">
+              {{item.courseName}}
+              <text wx:if="{{item.courseType}}" class="history-item__type">{{item.courseType}}</text>
+            </view>
+            <view class="history-item__meta">
+              <text wx:if="{{item.teacher}}">{{item.teacher}} 老师</text>
+              <text class="history-item__signin">{{item.signinTime}}签到</text>
+            </view>
+          </view>
+          <view class="history-item__hours">-{{item.hours}}课时</view>
+        </view>
+      </block>
+
+      <view class="op-loading" wx:else>还没有在该馆上过课</view>
+    </scroll-view>
+  </view>
+</view>

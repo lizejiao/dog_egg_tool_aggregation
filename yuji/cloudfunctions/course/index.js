@@ -28,7 +28,8 @@ function bizErr(message, code = 1) {
 async function assertAdmin(openid) {
   const res = await db.collection('users').where({ openid }).get()
   const user = res.data[0]
-  if (!user || user.role !== 'admin') throw bizErr('无权限操作，仅管理员可用', 403)
+  const role = (user && user.role) || ''
+  if (!user || ['owner', 'superadmin', 'admin'].indexOf(role) === -1) throw bizErr('无权限操作，仅管理员可用', 403)
   return user
 }
 
@@ -85,6 +86,9 @@ function buildCourseData(event) {
 /* ==================== 课程列表 ==================== */
 async function list(event) {
   const where = {}
+
+  // 归属场馆过滤
+  if (event.gymId) where.gymId = event.gymId
 
   // 时间范围：首页默认「从现在开始」，后台传 includePast 查全部
   let cond = null

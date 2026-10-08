@@ -1,0 +1,52 @@
+<!-- 城市选择器：搜索 + 热门 + 全国字母索引 -->
+<view class="city-mask" wx:if="{{show}}" bindtap="onClose">
+  <view class="city-panel" catchtap="noop">
+    <view class="city-panel__title">选择城市</view>
+
+    <!-- 搜索框 -->
+    <view class="city-search">
+      <text class="city-search__icon">🔍</text>
+      <input
+        class="city-search__input"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        placeholder="输入城市名搜索，如：杭州"
+        placeholder-class="city-search__placeholder"
+        confirm-type="search"
+      />
+    </view>
+
+    <scroll-view class="city-panel__scroll" scroll-y>
+      <!-- 搜索无结果 -->
+      <view class="city-empty" wx:if="{{searchEmpty}}">没有找到「{{keyword}}」的城市\n换个关键词试试</view>
+
+      <!-- 热门城市（搜索时隐藏） -->
+      <block wx:if="{{!keyword}}">
+        <view class="city-panel__sub">热门城市</view>
+        <view class="city-grid">
+          <view
+            class="city-grid__item {{city === item ? 'city-grid__item--on' : ''}}"
+            wx:for="{{hotCities}}"
+            wx:key="*this"
+            data-city="{{item}}"
+            bindtap="onCityTap"
+          >{{item}}</view>
+        </view>
+      </block>
+
+      <!-- 全国城市 -->
+      <block wx:for="{{cityGroups}}" wx:key="letter" wx:for-item="group">
+        <view class="city-panel__letter">{{group.letter}}</view>
+        <view class="city-grid">
+          <view
+            class="city-grid__item {{city === item ? 'city-grid__item--on' : ''}}"
+            wx:for="{{group.list}}"
+            wx:key="*this"
+            data-city="{{item}}"
+            bindtap="onCityTap"
+          >{{item}}</view>
+        </view>
+      </block>
+    </scroll-view>
+  </view>
+</view>

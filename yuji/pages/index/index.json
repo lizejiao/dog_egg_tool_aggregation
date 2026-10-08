@@ -3,6 +3,7 @@
   "enablePullDownRefresh": true,
   "usingComponents": {
     "course-card": "/components/course-card/course-card",
-    "empty": "/components/empty/empty"
+    "empty": "/components/empty/empty",
+    "city-picker": "/components/city-picker/city-picker"
   }
 }

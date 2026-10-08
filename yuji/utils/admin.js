@@ -24,4 +24,8 @@ async function guard() {
   return false
 }
 
-module.exports = { guard }
+// 同时兼容两种引入方式：
+//   const guard = require('../../utils/admin')       → guard() 直接调用
+//   const { guard } = require('../../utils/admin')   → 解构后调用
+module.exports = guard
+module.exports.guard = guard

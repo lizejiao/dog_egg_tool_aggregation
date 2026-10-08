@@ -6,6 +6,7 @@ const api = require('../../../utils/api')
 const guard = require('../../../utils/admin')
 const fmt = require('../../../utils/format')
 const C = require('../../../utils/constants')
+const app = getApp()
 
 Page({
   data: {
@@ -17,13 +18,31 @@ Page({
     logs: [],
     signins: [],
     activeTab: 0,
-    shopPackages: []
+    shopPackages: [],
+    gymScope: '' // 馆主：名下场馆（充值/调整课时归属该馆）
   },
 
   async onLoad(options) {
     if (!(await guard())) return
     this.setData({ ready: true, openid: options.openid || '' })
     this.load()
+    this.resolveGymScope()
+  },
+
+  /** 解析课时归属馆：馆主实时从服务端取名下场馆（缓存可能过期），超管=全局 */
+  async resolveGymScope() {
+    try {
+      if (app.isSuperAdmin()) return // 超管不传 gymId
+      const res = await api.call('gym', { action: 'myGyms' })
+      const gyms = res.list || []
+      if (gyms.length) {
+        this.setData({ gymScope: gyms[0]._id })
+        // 顺手回填全局缓存
+        app.globalData.myGyms = gyms
+      }
+    } catch (e) {
+      /* 拉取失败则退化为不传 gymId */
+    }
   },
 
   async load() {
@@ -99,16 +118,18 @@ Page({
     if (!confirmed) return
 
     try {
-      const res = await api.call(
-        'member',
-        {
-          action: 'adjust',
-          openid: this.data.openid,
-          amount: direction * amount,
-          reason: reason || (direction > 0 ? '手动增加' : '手动扣减')
-        },
-        { loading: true, loadingText: '调整中' }
-      )
+      const payload = {
+        action: 'adjust',
+        openid: this.data.openid,
+        amount: direction * amount,
+        reason: reason || (direction > 0 ? '手动增加' : '手动扣减')
+      }
+      if (this.data.gymScope) payload.gymId = this.data.gymScope
+      const res = await api.call('member', payload, { loading: true, loadingText: '调整中' })
+      // 返回值带 gymWritten：确认课时已写入馆账本（排查用）
+      if (direction > 0 && res && res.gymWritten === false) {
+        console.warn('[adjust] 课时未归属到场馆（操作者非馆主或名下无馆）', res)
+      }
       api.success('调整成功')
       this.load()
       return res
@@ -123,6 +144,30 @@ Page({
 
   onDeductHours() {
     this.adjustHours(-1)
+  },
+
+  /** 课时清零：全局余额 + 所有课时包（馆账本）全部归零，写流水留痕 */
+  async onResetHours() {
+    const user = this.data.user
+    if (!user) return
+    const confirmed = await api.confirm(
+      `将「${user.nickName || '该会员'}」的课时全部清零：\n\n当前全局剩余 ${user.balance} 课时\n已购套餐 ${this.data.myPackages.length} 条（含各馆课时包）\n\n该操作不可恢复，确认继续？`,
+      '课时清零',
+      '确认清零'
+    )
+    if (!confirmed) return
+
+    try {
+      await api.call(
+        'member',
+        { action: 'resetHours', openid: this.data.openid, reason: '数据修正：两本账不一致，清零重记' },
+        { loading: true, loadingText: '清零中' }
+      )
+      api.success('已清零')
+      this.load()
+    } catch (e) {
+      api.fail(e)
+    }
   },
 
   /** 开通套餐：ActionSheet 选择后确认 */

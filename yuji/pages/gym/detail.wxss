@@ -1,0 +1,243 @@
+/* 馆详情页 */
+.gym-hero {
+  background: linear-gradient(150deg, #9DAF9B 0%, #8FA68E 55%, #7E9480 100%);
+  border-radius: 28rpx;
+  padding: 34rpx 30rpx;
+  color: #FFFFFF;
+  box-shadow: 0 10rpx 30rpx rgba(126, 148, 128, 0.22);
+  margin-bottom: 24rpx;
+}
+
+.gym-hero__name {
+  font-size: 40rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.gym-hero__meta {
+  display: flex;
+  align-items: center;
+  margin-top: 14rpx;
+}
+
+/* 城市标签在深色底上换个配色 */
+.gym-hero .tag-green {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+}
+
+.gym-hero__meta-item {
+  margin-left: 16rpx;
+  font-size: 23rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.gym-hero__addr {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.gym-hero__addr-icon {
+  margin-right: 6rpx;
+}
+
+.gym-hero__desc {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.gym-hero__actions {
+  display: flex;
+  margin-top: 24rpx;
+}
+
+.gym-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  margin: 0 8rpx;
+  padding: 0;
+  border-radius: 36rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  font-size: 26rpx;
+}
+
+.gym-btn::after {
+  border: none;
+}
+
+.gym-btn--primary {
+  background-color: #FFFFFF;
+  color: var(--primary-dark, #79927A);
+  font-weight: 600;
+}
+
+.gym-btn--joined {
+  background-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.gym-btn--pending {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1rpx dashed rgba(255, 255, 255, 0.6);
+}
+
+/* 公告条（复用首页风格） */
+.notice {
+  display: flex;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: 18rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.notice__badge {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  color: #A9817D;
+  background-color: var(--rose-light, #F9EFEC);
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  margin-right: 18rpx;
+}
+
+.notice__swiper {
+  flex: 1;
+  min-width: 0;
+  height: 40rpx;
+}
+
+.notice__item {
+  font-size: 25rpx;
+  color: var(--text-sub, #888);
+  line-height: 40rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.notice__arrow {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  color: var(--text-weak, #BBB);
+  font-size: 30rpx;
+  line-height: 1;
+}
+
+.load-more {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-weak, #BBB);
+  padding: 24rpx 0;
+}
+
+/* 已学课程弹层 */
+.history-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 30rpx 30rpx 40rpx;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-panel__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text, #333);
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.history-panel__scroll {
+  height: 55vh;
+}
+
+.op-loading {
+  text-align: center;
+  padding: 80rpx 0;
+  font-size: 25rpx;
+  color: var(--text-sub, #999);
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+}
+
+.history-item + .history-item {
+  border-top: 1rpx solid #F1EFEC;
+}
+
+.history-item__time {
+  flex-shrink: 0;
+  width: 200rpx;
+  font-size: 22rpx;
+  color: var(--text-sub, #999);
+  line-height: 1.5;
+}
+
+.history-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item__name {
+  font-size: 28rpx;
+  color: var(--text, #333);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.history-item__type {
+  margin-left: 10rpx;
+  font-size: 20rpx;
+  color: var(--primary-dark, #79927A);
+  background-color: var(--primary-light, #EDF2EC);
+  border-radius: 8rpx;
+  padding: 2rpx 10rpx;
+}
+
+.history-item__meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-sub, #999);
+}
+
+.history-item__signin {
+  margin-left: 16rpx;
+}
+
+.history-item__hours {
+  flex-shrink: 0;
+  font-size: 23rpx;
+  color: #A9817D;
+}
+
+/* 该馆剩余课时（元信息行内徽标，已加入会员显示） */
+.gym-hero__balance {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.gym-hero__balance-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-right: 8rpx;
+}

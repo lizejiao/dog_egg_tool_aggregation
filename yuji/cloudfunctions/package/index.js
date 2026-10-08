@@ -27,7 +27,8 @@ function bizErr(message, code = 1) {
 async function assertAdmin(openid) {
   const res = await db.collection('users').where({ openid }).get()
   const user = res.data[0]
-  if (!user || user.role !== 'admin') throw bizErr('无权限操作，仅管理员可用', 403)
+  const role = (user && user.role) || ''
+  if (!user || ['owner', 'superadmin', 'admin'].indexOf(role) === -1) throw bizErr('无权限操作，仅管理员可用', 403)
   return user
 }
 

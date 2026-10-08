@@ -1,0 +1,149 @@
+/* 超管：场馆表单页 */
+.form-item {
+  padding: 20rpx 0;
+}
+
+.form-label {
+  font-size: 25rpx;
+  color: var(--text-sub);
+  margin-bottom: 12rpx;
+}
+
+.form-required {
+  color: #C86F6A;
+}
+
+.form-input {
+  background-color: #F6F4F1;
+  border-radius: 14rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: var(--text);
+}
+
+.form-input--select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-select-arrow {
+  color: var(--text-sub);
+  font-size: 22rpx;
+}
+
+.form-placeholder {
+  color: var(--text-weak);
+}
+
+.form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 140rpx;
+  background-color: #F6F4F1;
+  border-radius: 14rpx;
+  padding: 20rpx 24rpx;
+  font-size: 27rpx;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.btn-primary {
+  margin-top: 30rpx;
+  background-color: var(--primary, #8FA68E);
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.btn-primary[disabled] {
+  opacity: 0.6;
+  color: #FFFFFF;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.form-tip {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-weak);
+  margin-top: 20rpx;
+}
+
+/* 城市选择器（与首页同款） */
+.city-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 999;
+}
+
+.city-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 30rpx 30rpx 40rpx;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.city-panel__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.city-panel__scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.city-panel__sub {
+  font-size: 24rpx;
+  color: var(--text-sub);
+  margin: 10rpx 0 14rpx;
+}
+
+.city-panel__letter {
+  font-size: 24rpx;
+  color: var(--primary-dark, #79927A);
+  font-weight: 600;
+  margin: 20rpx 0 12rpx;
+}
+
+.city-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.city-grid__item {
+  width: 21%;
+  margin: 1.5%;
+  padding: 14rpx 0;
+  text-align: center;
+  font-size: 25rpx;
+  color: var(--text);
+  background-color: #F6F4F1;
+  border-radius: 12rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.city-grid__item--on {
+  background-color: var(--primary, #8FA68E);
+  color: #FFFFFF;
+  font-weight: 600;
+}

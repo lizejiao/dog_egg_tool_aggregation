@@ -27,7 +27,8 @@
         >{{phoneText}}</button>
       </view>
 
-      <view class="tag {{isAdmin ? 'tag-rose' : 'tag-green'}}">{{roleText}}</view>
+      <view wx:if="{{!user}}" class="tag tag-green" bindtap="relogin" hover-class="tag-hover">点击登录</view>
+      <view wx:else class="tag {{isAdmin ? 'tag-rose' : 'tag-green'}}" bindtap="onLogout" hover-class="tag-hover">{{roleText}} · 退出</view>
     </view>
 
     <view class="member-divider"></view>
@@ -49,8 +50,8 @@
     </view>
   </view>
 
-  <!-- 我的记录 -->
-  <view class="card">
+  <!-- 我的记录（学员/馆主可见；超管隐藏） -->
+  <view class="card" wx:if="{{!isSuperAdmin}}">
     <view class="menu-item" bindtap="goOrders">
       <view class="menu-item__left">我的预约</view>
       <view class="row">
@@ -71,23 +72,24 @@
     </view>
   </view>
 
-  <!-- 馆主管理入口（仅管理员可见） -->
-  <view class="card" wx:if="{{isAdmin}}">
+  <!-- 管理入口：按角色区分 -->
+  <!-- 馆主：馆主后台 -->
+  <view class="card" wx:if="{{isOwner}}">
     <view class="menu-item" bindtap="goAdmin">
       <view class="menu-item__left t-primary">馆主管理后台</view>
       <view class="menu-item__arrow"></view>
     </view>
   </view>
 
-  <!-- 馆主入口：输入口令升级为管理员 -->
-  <view class="card card--flat" wx:if="{{!isAdmin}}">
-    <view class="menu-item menu-item--muted" bindtap="onBindAdmin">
-      <view class="menu-item__left">馆主入口</view>
+  <!-- 超管：平台管理（场馆/馆主任免） -->
+  <view class="card" wx:if="{{isSuperAdmin}}">
+    <view class="menu-item" bindtap="goAdmin">
+      <view class="menu-item__left t-primary">平台管理</view>
       <view class="menu-item__arrow"></view>
     </view>
   </view>
 
-  <!-- 首次部署初始化 -->
+  <!-- 首次部署初始化（仅学员可见） -->
   <view class="card card--flat" wx:if="{{!isAdmin}}">
     <view class="menu-item menu-item--muted" bindtap="onInitDatabase">
       <view class="menu-item__left">初始化数据（首次使用）</view>

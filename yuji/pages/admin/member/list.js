@@ -4,6 +4,7 @@
  */
 const api = require('../../../utils/api')
 const guard = require('../../../utils/admin')
+const app = getApp()
 
 const PAGE_SIZE = 50
 
@@ -13,14 +14,30 @@ Page({
     list: [],
     total: 0,
     finished: false,
-    loading: true
+    loading: true,
+    gymScope: '' // 馆主：名下场馆（只显示该馆会员）
   },
 
   async onLoad() {
     const ok = await guard()
     if (!ok) return
     this._loaded = true
-    this.load()
+    this.resolveGymScope().then(() => this.load())
+  },
+
+  /** 解析会员范围：馆主实时取名下场馆（缓存可能过期），超管=全部注册用户 */
+  async resolveGymScope() {
+    try {
+      if (app.isSuperAdmin()) return
+      const res = await api.call('gym', { action: 'myGyms' })
+      const gyms = res.list || []
+      if (gyms.length) {
+        this.setData({ gymScope: gyms[0]._id })
+        app.globalData.myGyms = gyms
+      }
+    } catch (e) {
+      /* 失败退化为全部 */
+    }
   },
 
   onShow() {
@@ -43,11 +60,13 @@ Page({
   async load() {
     this.setData({ loading: true })
     try {
-      const data = await api.call('member', {
+      const payload = {
         action: 'list',
         keyword: this.data.keyword.trim(),
         limit: PAGE_SIZE
-      })
+      }
+      if (this.data.gymScope) payload.gymId = this.data.gymScope
+      const data = await api.call('member', payload)
       const list = (data.list || []).map((u) =>
         Object.assign({}, u, {
           avatarText: (u.nickName || '客')[0]

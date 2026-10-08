@@ -1,0 +1,46 @@
+<!-- 超管：创建/编辑场馆 -->
+<view class="page">
+  <view class="card">
+    <view class="form-item">
+      <view class="form-label">场馆名称 <text class="form-required">*</text></view>
+      <input class="form-input" value="{{name}}" data-field="name" bindinput="onInput" placeholder="如：悦己瑜伽（朝阳店）" placeholder-class="form-placeholder" maxlength="30" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">所在城市 <text class="form-required">*</text></view>
+      <view class="form-input form-input--select" bindtap="openCityPicker">
+        <text wx:if="{{city}}">{{city}}</text>
+        <text wx:else class="form-placeholder">点击选择城市</text>
+        <text class="form-select-arrow">▾</text>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">详细地址</view>
+      <input class="form-input" value="{{address}}" data-field="address" bindinput="onInput" placeholder="街道、门牌号（选填）" placeholder-class="form-placeholder" maxlength="60" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">联系电话</view>
+      <input class="form-input" type="number" value="{{phone}}" data-field="phone" bindinput="onInput" placeholder="用于学员电话咨询（选填）" placeholder-class="form-placeholder" maxlength="15" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">场馆简介</view>
+      <textarea class="form-textarea" value="{{desc}}" data-field="desc" bindinput="onInput" placeholder="场馆特色、师资等介绍（选填）" placeholder-class="form-placeholder" maxlength="200" auto-height />
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="onSubmit" disabled="{{submitting}}">
+    {{isEdit ? '保存修改' : '创建场馆'}}
+  </button>
+  <view class="form-tip" wx:if="{{!isEdit}}">创建后可在场馆列表中邀请馆主，馆主再完善信息与排课</view>
+</view>
+
+<!-- 城市选择器组件 -->
+<city-picker
+  show="{{cityPickerShow}}"
+  city="{{city}}"
+  bindselect="onCitySelectEvent"
+  bindclose="closeCityPicker"
+/>

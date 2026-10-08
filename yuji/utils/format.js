@@ -121,6 +121,11 @@ function shiftDay(n) {
   return d
 }
 
+/** 今天的日期键 YYYY-MM-DD（本地时区） */
+function todayKey() {
+  return formatDate(new Date())
+}
+
 module.exports = {
   pad,
   toDate,
@@ -135,5 +140,6 @@ module.exports = {
   currency,
   fromNow,
   dateKey,
+  todayKey,
   shiftDay
 }

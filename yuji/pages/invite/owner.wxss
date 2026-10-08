@@ -1,0 +1,99 @@
+/* 邀请落地页 */
+.invite-loading {
+  text-align: center;
+  padding: 200rpx 0;
+  color: var(--text-sub);
+  font-size: 26rpx;
+}
+
+.invite-hero {
+  background: linear-gradient(150deg, #9DAF9B 0%, #8FA68E 55%, #7E9480 100%);
+  border-radius: 28rpx;
+  padding: 50rpx 40rpx;
+  color: #FFFFFF;
+  text-align: center;
+  box-shadow: 0 10rpx 30rpx rgba(126, 148, 128, 0.22);
+}
+
+.invite-hero__emoji {
+  font-size: 90rpx;
+}
+
+.invite-hero__title {
+  margin-top: 20rpx;
+  font-size: 36rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.invite-hero__gym {
+  margin-top: 12rpx;
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.invite-hero__sub {
+  margin-top: 30rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: left;
+}
+
+.invite-hero__list {
+  margin-top: 8rpx;
+  text-align: left;
+}
+
+.invite-hero__item {
+  font-size: 24rpx;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.btn-primary {
+  margin-top: 40rpx;
+  background-color: var(--primary, #8FA68E);
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-primary[disabled] {
+  opacity: 0.6;
+  color: #FFFFFF;
+}
+
+.invite-skip {
+  text-align: center;
+  margin-top: 26rpx;
+  font-size: 25rpx;
+  color: var(--text-sub);
+  padding: 10rpx;
+}
+
+.invite-result {
+  text-align: center;
+  padding: 120rpx 40rpx;
+}
+
+.invite-result__emoji {
+  font-size: 90rpx;
+}
+
+.invite-result__title {
+  margin-top: 20rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.invite-result__sub {
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  color: var(--text-sub);
+}

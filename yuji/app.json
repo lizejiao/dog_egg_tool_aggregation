@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/gym/detail",
     "pages/course/detail",
     "pages/mine/mine",
     "pages/mine/orders",
@@ -13,7 +14,9 @@
     "pages/admin/member/detail",
     "pages/admin/order/list",
     "pages/admin/stats",
-    "pages/admin/notice"
+    "pages/admin/notice",
+    "pages/super/gym-edit",
+    "pages/invite/owner"
   ],
   "window": {
     "backgroundTextStyle": "dark",

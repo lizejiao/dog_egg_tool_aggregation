@@ -4,6 +4,7 @@
  */
 const app = getApp()
 const api = require('../../utils/api')
+const auth = require('../../utils/auth')
 
 // 微信官方默认灰色头像
 const DEFAULT_AVATAR =
@@ -13,6 +14,9 @@ Page({
   data: {
     user: null,
     isAdmin: false,
+    isSuperAdmin: false,
+    isOwner: false,
+    myGyms: [],
     roleText: '学员',
     avatarUrl: DEFAULT_AVATAR,
     nickName: '',
@@ -23,7 +27,32 @@ Page({
   },
 
   onShow() {
+    // 已退出状态下不自动登录，直到用户点击「登录」
+    if (this._loggedOut) return
     this.load()
+  },
+
+  /* ---------- 退出后重新登录 ---------- */
+  async relogin() {
+    try {
+      const user = await app.relogin()
+      this.applyUser(user)
+      this.load()
+    } catch (e) {
+      api.fail(e, '登录失败')
+    }
+  },
+
+  /** 游客点功能：引导登录后继续（返回 true 才继续跳转） */
+  async _needLogin(tip) {
+    if (app.isLoggedIn()) return true
+    const ok = await auth.ensureLogin(tip)
+    if (ok) {
+      // 登录成功：刷新整个页面数据
+      this.applyUser(await app.ensureLogin())
+      this.load()
+    }
+    return ok
   },
 
   /** 拉取会员信息与统计数字 */
@@ -53,10 +82,16 @@ Page({
     const activePackages = (user.packages || []).filter(
       (p) => (p.usedHours || 0) < p.totalHours && (!p.expireAt || p.expireAt > now)
     )
+    const role = user.role || 'student'
+    const isSuperAdmin = role === 'superadmin'
+    const isOwner = role === 'owner' || role === 'admin'
     this.setData({
       user,
-      isAdmin: user.role === 'admin',
-      roleText: user.role === 'admin' ? '馆主' : '学员',
+      isAdmin: isOwner || isSuperAdmin,
+      isSuperAdmin,
+      isOwner,
+      myGyms: app.getMyGyms ? app.getMyGyms() : [],
+      roleText: isSuperAdmin ? '超级管理员' : isOwner ? '馆主' : '学员',
       avatarUrl: user.avatarUrl || DEFAULT_AVATAR,
       nickName: user.nickName || '',
       phoneText: user.phone ? user.phone : '点击绑定手机号',
@@ -124,19 +159,6 @@ Page({
     }
   },
 
-  /* ---------- 馆主入口：口令升级为管理员 ---------- */
-  async onBindAdmin() {
-    const password = await api.prompt('馆主验证', '请输入管理员口令', '')
-    if (!password) return
-    try {
-      await api.call('login', { action: 'bindAdmin', password }, { loading: true, loadingText: '验证中' })
-      this.applyUser(await app.refreshUser())
-      api.success('已升级为馆主')
-    } catch (err) {
-      api.fail(err)
-    }
-  },
-
   /* ---------- 首次部署：初始化集合与演示数据 ---------- */
   async onInitDatabase() {
     const confirmed = await api.confirm(
@@ -156,17 +178,44 @@ Page({
     }
   },
 
-  /* ---------- 页面跳转 ---------- */
-  goOrders() {
+  /* ---------- 页面跳转（游客需先登录） ---------- */
+  async goOrders() {
+    if (!(await this._needLogin('查看我的预约需要先登录'))) return
     wx.navigateTo({ url: '/pages/mine/orders' })
   },
-  goPackages() {
+  async goPackages() {
+    if (!(await this._needLogin('查看课时套餐需要先登录'))) return
     wx.navigateTo({ url: '/pages/mine/packages' })
   },
-  goSignins() {
+  async goSignins() {
+    if (!(await this._needLogin('查看签到记录需要先登录'))) return
     wx.navigateTo({ url: '/pages/mine/signins' })
   },
   goAdmin() {
     wx.navigateTo({ url: '/pages/admin/home' })
+  },
+
+  /* ---------- 退出登录：点击身份标签 ---------- */
+  async onLogout() {
+    const confirmed = await api.confirm('确定退出当前账号吗？', '退出登录', '退出')
+    if (!confirmed) return
+    app.logout()
+    this._loggedOut = true
+    // 重置页面为未登录态
+    this.setData({
+      user: null,
+      isAdmin: false,
+      isSuperAdmin: false,
+      isOwner: false,
+      myGyms: [],
+      roleText: '未登录',
+      avatarUrl: DEFAULT_AVATAR,
+      nickName: '',
+      phoneText: '点击绑定手机号',
+      activePackages: [],
+      bookedCount: 0,
+      signinCount: 0
+    })
+    api.success('已退出')
   }
 })

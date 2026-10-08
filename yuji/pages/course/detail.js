@@ -4,6 +4,7 @@
  */
 const app = getApp()
 const api = require('../../utils/api')
+const auth = require('../../utils/auth')
 const { decorate } = require('../../utils/course')
 const { HOURS_PER_CLASS } = require('../../utils/config')
 
@@ -76,12 +77,17 @@ Page({
     const { course, myOrder, canBook } = this.data
     if (this.data.submitting) return
 
+    // 游客：先引导登录
+    if (!(await auth.ensureLogin('预约课程需要先登录'))) return
+    // 刚登录上：刷新用户态（balance），重算按钮
+    await this.load()
+
     // 课时不足：跳转到我的套餐页
     if (course && course.display === 'bookable' && this.data.balance < HOURS_PER_CLASS && !myOrder) {
       wx.navigateTo({ url: '/pages/mine/packages' })
       return
     }
-    if (!canBook) {
+    if (!this.data.canBook) {
       api.toast('当前无法预约该课程')
       return
     }

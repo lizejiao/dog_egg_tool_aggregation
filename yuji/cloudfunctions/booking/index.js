@@ -31,7 +31,8 @@ function bizErr(message, code = 1) {
 async function assertAdmin(openid) {
   const res = await db.collection('users').where({ openid }).get()
   const user = res.data[0]
-  if (!user || user.role !== 'admin') throw bizErr('无权限操作，仅管理员可用', 403)
+  const role = (user && user.role) || ''
+  if (!user || ['owner', 'superadmin', 'admin'].indexOf(role) === -1) throw bizErr('无权限操作，仅管理员可用', 403)
   return user
 }
 
@@ -64,9 +65,14 @@ async function create(event, openid) {
 
     // 4. 写预约记录（带课程快照，课程被删后仍可展示）
     const now = Date.now()
+    // dateKey：按上课日期（本地时区），馆主「今日预约」按它过滤
+    const d = new Date(course.startTime)
+    const p2 = (n) => (n < 10 ? '0' + n : '' + n)
+    const dateKey = course.dateKey || `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`
     const orderData = {
       openid,
       courseId: event.courseId,
+      gymId: course.gymId || '', // 归属馆
       courseName: course.name,
       courseType: course.type,
       teacher: course.teacher,
@@ -74,6 +80,7 @@ async function create(event, openid) {
       startTime: course.startTime,
       endTime: course.endTime,
       startTimeStr: course.startTimeStr || '',
+      dateKey,
       status: 'booked', // booked 已预约 / signed 已签到 / canceled 已取消
       createTime: now,
       updateTime: now,
@@ -145,9 +152,11 @@ async function listMine(event, openid) {
 /* ==================== 我的签到记录 ==================== */
 async function mySignins(event, openid) {
   const limit = Math.min(parseInt(event.limit, 10) || 50, 100)
+  const where = { openid }
+  if (event.gymId) where.gymId = event.gymId
   const res = await db
     .collection('signin')
-    .where({ openid })
+    .where(where)
     .orderBy('signinTime', 'desc')
     .limit(limit)
     .get()
@@ -159,6 +168,8 @@ async function listAll(event) {
   const where = {}
   if (event.status) where.status = event.status
   if (event.courseId) where.courseId = event.courseId
+  if (event.dateKey) where.dateKey = event.dateKey
+  if (event.gymId) where.gymId = event.gymId
 
   const limit = Math.min(parseInt(event.limit, 10) || 30, 100)
   const skip = parseInt(event.skip, 10) || 0
@@ -182,8 +193,15 @@ async function listAll(event) {
       return map
     }, {})
   }
+  // 内联会员信息到每条预约（首页馆主视图用）
+  const list = (res.data || []).map((o) =>
+    Object.assign({}, o, {
+      nickName: (userMap[o.openid] && userMap[o.openid].nickName) || '会员',
+      phone: (userMap[o.openid] && userMap[o.openid].phone) || ''
+    })
+  )
 
-  return ok({ total: countRes.total, list: res.data, userMap })
+  return ok({ total: countRes.total, list, userMap })
 }
 
 /* ==================== 签到（管理员） ==================== */
@@ -290,7 +308,8 @@ exports.main = async (event) => {
       case 'cancel': {
         // 管理员可以代学员取消
         const userRes = await db.collection('users').where({ openid: OPENID }).get()
-        const isAdmin = userRes.data[0] && userRes.data[0].role === 'admin'
+        const role = (userRes.data[0] && userRes.data[0].role) || ''
+        const isAdmin = ['owner', 'superadmin', 'admin'].indexOf(role) > -1
         return await cancel(event, OPENID, isAdmin)
       }
       case 'listMine':
