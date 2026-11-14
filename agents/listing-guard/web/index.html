@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>listing-guard · 房源自动审核控制台</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --border:#e5e7eb; --text:#1f2328; --muted:#6b7280;
+    --pass:#3b6d11; --pass-bg:#eaf3de; --review:#854f0b; --review-bg:#faeeda;
+    --reject:#a32d2d; --reject-bg:#fcebeb; --blue:#185fa5; --blue-bg:#e6f1fb;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); font-size:14px}
+  .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 60px}
+  h1{font-size:18px; font-weight:600; margin-bottom:4px}
+  .sub{color:var(--muted); font-size:12px; margin-bottom:18px}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px}
+  .stat{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px}
+  .stat .n{font-size:22px; font-weight:600}
+  .stat .l{color:var(--muted); font-size:12px; margin-top:2px}
+  .panel{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:14px}
+  .panel h2{font-size:14px; font-weight:600; margin-bottom:10px}
+  select,button{font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--border); background:var(--card); cursor:pointer}
+  button.primary{background:var(--blue); color:#fff; border-color:var(--blue)}
+  button.warn{background:var(--review-bg); color:var(--review); border-color:#f0d9a8}
+  button.danger{background:var(--reject-bg); color:var(--reject); border-color:#f0c4c4}
+  button:disabled{opacity:.45; cursor:not-allowed}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .verdict{display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600}
+  .v-pass{background:var(--pass-bg); color:var(--pass)}
+  .v-review{background:var(--review-bg); color:var(--review)}
+  .v-reject{background:var(--reject-bg); color:var(--reject)}
+  .v-pending{background:var(--blue-bg); color:var(--blue)}
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th{color:var(--muted); font-weight:500; text-align:left; padding:6px 8px; border-bottom:1px solid var(--border)}
+  td{padding:7px 8px; border-bottom:1px solid #f0f1f3; vertical-align:top}
+  .tag{display:inline-block; padding:1px 8px; border-radius:10px; font-size:11px}
+  .t-pass{background:var(--pass-bg); color:var(--pass)}
+  .t-hit{background:var(--review-bg); color:var(--review)}
+  .t-veto{background:var(--reject-bg); color:var(--reject)}
+  .t-degraded{background:var(--blue-bg); color:var(--blue)}
+  .score-bar{height:6px; background:#eef0f2; border-radius:4px; overflow:hidden; margin-top:3px}
+  .score-fill{height:100%; border-radius:4px}
+  .opinion{background:#fbfaf7; border-left:3px solid #d9c58c; padding:10px 12px; border-radius:0 8px 8px 0; font-size:13px; line-height:1.7; white-space:pre-wrap}
+  .events{max-height:180px; overflow-y:auto; font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--muted); line-height:1.8}
+  .hint{color:var(--muted); font-size:12px}
+  .empty{color:var(--muted); text-align:center; padding:30px 0}
+  .tabs{display:flex; gap:4px; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:0}
+  .tab{padding:8px 18px; cursor:pointer; color:var(--muted); font-size:13px; border-bottom:2px solid transparent; margin-bottom:-1px}
+  .tab.active{color:var(--blue); border-bottom-color:var(--blue); font-weight:600}
+  .src-tag{display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600}
+  .s-auto{background:var(--pass-bg); color:var(--pass)}
+  .s-human{background:var(--blue-bg); color:var(--blue)}
+  .st-tag{display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; white-space:nowrap}
+  .st-gov{background:var(--blue-bg); color:var(--blue)}
+  .st-mat{background:#f3eefb; color:#534ab7}
+  .st-human{background:var(--review-bg); color:var(--review)}
+  .st-rej{background:var(--reject-bg); color:var(--reject)}
+  .st-other{background:#eef0f2; color:var(--muted)}
+  .modal-mask{position:fixed; inset:0; background:rgba(31,35,40,.45); display:flex; align-items:center; justify-content:center; z-index:50}
+  .modal{background:var(--card); border-radius:12px; width:min(680px,92vw); max-height:84vh; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,.18)}
+  .modal-head{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--border)}
+  .modal-head b{font-size:15px}
+  .modal-close{border:none; background:none; font-size:20px; color:var(--muted); cursor:pointer; padding:0 4px}
+  .modal-body{padding:14px 18px; overflow-y:auto}
+  .kv{display:grid; grid-template-columns:110px 1fr; gap:6px 12px; font-size:13px; margin-bottom:14px}
+  .kv .k{color:var(--muted)}
+  .kv .v{word-break:break-all}
+  .modal h3{font-size:13px; font-weight:600; margin:12px 0 8px; color:var(--text)}
+  .file-list{font-size:12px; color:var(--muted); line-height:1.9; font-family:ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>listing-guard · 房源发房自动审核控制台</h1>
+  <div class="sub">LangGraph 状态机 · 五子图并行核验 · 断点续跑 · 人工协同 —— mock 模式演示</div>
+  <div class="tabs"><span class="tab active" onclick="switchTab('audit')">审核工作台</span><span class="tab" onclick="switchTab('pending')">审核队列</span><span class="tab" onclick="switchTab('listings')">上架房源</span></div>
+
+  <div id="tab-audit">
+  <div class="cards" id="stats"></div>
+
+  <div class="panel">
+    <h2>提交审核</h2>
+    <div class="row">
+      <select id="fixture"></select>
+      <button class="primary" id="btn-submit" onclick="submitAudit()">提交</button>
+      <span class="hint" id="submit-hint">提交后跑到第一个挂起点（政府核验等异步回调）</span>
+    </div>
+  </div>
+
+  <div id="detail"></div>
+  </div>
+
+  <div id="modal-root"></div>
+
+  <div id="tab-pending" style="display:none">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">审核队列 · 未上架房源</h2>
+        <div class="row">
+          <select id="st-filter" onchange="loadPending()">
+            <option value="all">全部状态</option>
+            <option value="pending">挂起中</option>
+            <option value="rejected">已驳回</option>
+          </select>
+          <button onclick="loadPending()">刷新</button>
+        </div>
+      </div>
+      <p class="hint" style="margin:8px 0">数据源：检查点库（每单一个 thread）——挂起中的单子可直接点对应按钮继续流转；已上架的在此隐藏</p>
+      <table id="pending-table">
+        <tr><th>房源</th><th>小区/城市</th><th>月租</th><th>户型</th><th style="width:130px">审核状态</th><th>置信度</th><th style="width:210px">操作</th><th>审核单号</th><th style="width:150px">查询</th></tr>
+      </table>
+      <div class="empty" id="pending-empty" style="display:none">队列为空 —— 没有待处理或被驳回的审核单</div>
+    </div>
+  </div>
+
+  <div id="tab-listings" style="display:none">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">已上架房源</h2>
+        <div class="row">
+          <select id="src-filter" onchange="loadListings()">
+            <option value="all">全部来源</option>
+            <option value="auto">自动核验上架</option>
+            <option value="human">人工放行上架</option>
+          </select>
+          <button onclick="loadListings()">刷新</button>
+        </div>
+      </div>
+      <p class="hint" style="margin:8px 0">数据源：上架房源表（data/published.jsonl）——自动上架由决策节点落库，人工放行由裁决节点落库；首次查询自动从检查点库回填历史记录</p>
+      <table id="listings-table">
+        <tr><th>房源</th><th>小区/城市</th><th>月租</th><th>户型/面积</th><th style="width:110px">上架方式</th><th>置信度</th><th>审核单号</th><th>上架时间</th><th style="width:150px">操作</th></tr>
+      </table>
+      <div class="empty" id="listings-empty" style="display:none">暂无已上架房源 —— 在「审核工作台」提交并通过审核后自动入表</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const fmt = (s, d=0) => s===null||s===undefined ? "-" : (typeof s==="number" ? s.toFixed(d) : s);
+
+async function loadStats(){
+  const r = await fetch("/stats").then(r=>r.json());
+  if(!r.total){ $("#stats").innerHTML = `<div class="panel empty" style="grid-column:1/-1">暂无数据 —— 提交一条审核开始演示</div>`; return; }
+  const items = [
+    ["累计审核", r.total], ["自动覆盖率", (r.auto_coverage*100).toFixed(0)+"%"],
+    ["转人工率", (r.human_rate*100).toFixed(0)+"%"], ["P95 耗时", r.p95_ms+" ms"], ["降级因子数", r.degraded],
+  ];
+  $("#stats").innerHTML = items.map(([l,n])=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
+}
+
+async function loadFixtures(){
+  const list = await fetch("/fixtures").then(r=>r.json());
+  $("#fixture").innerHTML = list.map(f=>`<option value="${f.case}">${f.case} — ${f.note||""}</option>`).join("");
+}
+
+async function submitAudit(){
+  const c = $("#fixture").value;
+  $("#btn-submit").disabled = true; $("#submit-hint").textContent = "审核执行中（并行子图 + 挂起）……";
+  try{
+    const r = await fetch("/audit", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({case:c})}).then(r=>r.json());
+    render(r);
+  }catch(e){ alert("提交失败："+e); }
+  $("#btn-submit").disabled = false; $("#submit-hint").textContent = "提交后跑到第一个挂起点（政府核验等异步回调）";
+  loadStats();
+}
+
+async function refresh(id){
+  render(await fetch(`/audit/${id}`).then(r=>r.json()));
+  loadStats();
+}
+
+function verdictClass(v){
+  if(v==="auto_approve"||v==="human_approved") return "v-pass";
+  if(v==="auto_reject"||v==="human_rejected") return "v-reject";
+  if(v) return "v-review";
+  return "v-pending";
+}
+function verdictText(s){
+  const v = s.verdict;
+  if(v) return {auto_approve:"自动上架", auto_reject:"自动驳回", human_approved:"人工放行", human_rejected:"人工驳回", human_review:"转人工中"}[v]||v;
+  if(s.pending.includes("gov_verify")) return "等政府核验回调";
+  if(s.pending.includes("wait_material")) return "等房东补材料";
+  return "处理中";
+}
+function scoreColor(sc){ return sc>=0.85?"var(--pass)":sc<=0.35?"var(--reject)":"var(--review)"; }
+
+function render(s){
+  const parts = [];
+  parts.push(`<div class="panel"><div class="row" style="justify-content:space-between">
+    <div class="row">
+      <span class="verdict ${verdictClass(s)}">${verdictText(s)}</span>
+      <b>${s.listing_title||""}</b>
+      <span class="hint">${s.audit_id} · 策略版本 ${s.policy_version||"-"}</span>
+    </div>
+    <div class="row">
+      ${s.pending.includes("gov_verify")?`<button class="primary" onclick="govCallback('${s.audit_id}')">模拟政府回调</button>`:""}
+      ${s.pending.includes("wait_material")?`<button class="primary" onclick="supplement('${s.audit_id}')">模拟房东补材料</button>`:""}
+      ${s.pending.includes("human_review")?`
+        <button class="warn" onclick="decide('${s.audit_id}','approve')">人工放行</button>
+        <button class="danger" onclick="decide('${s.audit_id}','reject')">人工驳回</button>`:""}
+      <button onclick="refresh('${s.audit_id}')">刷新</button>
+    </div>
+  </div></div>`);
+
+  if(s.factors && s.factors.length){
+    parts.push(`<div class="panel"><h2>验真因子（加权合成 · 可解释）　置信度 <b style="color:${scoreColor(s.score)}">${fmt(s.score,4)}</b>
+      ${s.veto_hits.length?`　<span class="tag t-veto">否决：${s.veto_hits.join("、")}</span>`:""}
+      ${s.injection_hits.length?`　<span class="tag t-veto">注入命中 ${s.injection_hits.length} 处</span>`:""}</h2>
+      <table><tr><th style="width:150px">因子</th><th style="width:60px">类型</th><th style="width:52px">权重</th><th style="width:120px">得分</th><th>说明</th></tr>
+      ${s.factors.map(f=>`<tr>
+        <td>${f.name}</td>
+        <td class="hint">${f.kind==="probabilistic"?"模型":"规则"}</td>
+        <td>${f.weight}</td>
+        <td>${f.score}<div class="score-bar"><div class="score-fill" style="width:${f.score*100}%;background:${scoreColor(f.score)}"></div></div></td>
+        <td>${f.detail} ${f.status!=="pass"?`<span class="tag t-${f.status}">${{hit:"命中",veto:"否决",degraded:"降级"}[f.status]}</span>`:""}</td>
+      </tr>`).join("")}</table></div>`);
+  }
+
+  if(s.opinion){
+    parts.push(`<div class="panel"><h2>AI 评判意见（供人工参考，不影响路由）</h2><div class="opinion">${s.opinion}</div></div>`);
+  }
+
+  if(s.events && s.events.length){
+    parts.push(`<div class="panel"><h2>执行轨迹（与 SQLite 检查点 history 对应）</h2><div class="events">${s.events.map(e=>"· "+e).join("<br>")}</div></div>`);
+  }
+
+  $("#detail").innerHTML = parts.join("");
+}
+
+async function govCallback(id){
+  const r = await fetch(`/audit/${id}/gov-callback`, {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"}).then(r=>r.json());
+  if(r.detail) return alert(r.detail);
+  render(r); loadStats();
+}
+async function decide(id, action){
+  const r = await fetch(`/audit/${id}/decision`, {method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action, comment:"控制台演示裁决"})}).then(r=>r.json());
+  render(r); loadStats();
+}
+async function supplement(id){
+  const c = $("#fixture").value;
+  const fx = await fetch("/fixtures").then(r=>r.json());
+  const note = fx.find(f=>f.case===c);
+  const sup = await fetch(`/audit/${id}/supplement`, {method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({fields:{images:[{path:"images/supplement/1.jpg", mock:{authenticity:0.96, phash:"ffff0000aaaa1111", is_duplicate:false, detected_rooms:2, ocr_text:""}}]}})}).then(r=>r.json());
+  if(sup.detail) return alert(sup.detail);
+  render(sup); loadStats();
+}
+
+function switchTab(t){
+  document.querySelectorAll(".tab").forEach(el=>el.classList.remove("active"));
+  document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add("active");
+  $("#tab-audit").style.display = t==="audit" ? "" : "none";
+  $("#tab-pending").style.display = t==="pending" ? "" : "none";
+  $("#tab-listings").style.display = t==="listings" ? "" : "none";
+  if(t==="pending") loadPending();
+  if(t==="listings") loadListings();
+}
+
+const ST_CLS = {waiting_gov:"st-gov", waiting_material:"st-mat", waiting_human:"st-human", rejected_auto:"st-rej", rejected_human:"st-rej", other:"st-other"};
+async function loadPending(){
+  const st = $("#st-filter").value;
+  const rows = await fetch(`/pending?status=${st}`).then(r=>r.json());
+  const tb = $("#pending-table");
+  tb.innerHTML = `<tr><th>房源</th><th>小区/城市</th><th>月租</th><th>户型</th><th style="width:130px">审核状态</th><th>置信度</th><th style="width:210px">操作</th><th>审核单号</th><th style="width:150px">查询</th></tr>`;
+  $("#pending-empty").style.display = rows.length ? "none" : "";
+  rows.forEach(r=>{
+    const tr = document.createElement("tr");
+    let ops = "";
+    if(r.status==="waiting_gov") ops = `<button class="primary" onclick="resumeGov('${r.audit_id}')">模拟政府回调</button>`;
+    else if(r.status==="waiting_material") ops = `<button class="primary" onclick="resumeSupp('${r.audit_id}')">模拟补材料</button>`;
+    else if(r.status==="waiting_human") ops = `<button class="warn" onclick="decide('${r.audit_id}','approve')">放行</button> <button class="danger" onclick="decide('${r.audit_id}','reject')">驳回</button>`;
+    else if(r.status.startsWith("rejected")) ops = `<span class="hint">已终态${r.veto_hits.length?` · 否决：${r.veto_hits[0]}${r.veto_hits.length>1?" 等":""}`:""}</span>`;
+    tr.innerHTML = `
+      <td>${r.listing_title||"-"}${r.has_opinion?` <span class="tag t-hit" title="AI 评判意见待查看">AI意见</span>`:""}</td>
+      <td>${r.community||"-"} · ${r.city||""}</td>
+      <td>¥${r.price||"-"}/月</td>
+      <td>${r.rooms||"-"}室 ${r.area||"-"}㎡</td>
+      <td><span class="st-tag ${ST_CLS[r.status]||"st-other"}">${r.status_text}</span></td>
+      <td>${r.score!=null?r.score:"-"}</td>
+      <td>${ops}</td>
+      <td class="hint">${r.audit_id}</td>
+      <td><button onclick="showMaterial('${r.audit_id}')">房源基本信息查询</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+async function showMaterial(id){
+  const m = await fetch(`/audit/${id}/material`).then(r=>r.json());
+  if(m.detail) return alert(m.detail);
+  const formRows = Object.entries(m.form||{}).map(([k,v])=>
+    `<div class="k">${k}</div><div class="v">${v===null||v===undefined||v===""?"-":v}</div>`).join("");
+  const imgs = (m.images||[]).map(i=>`· ${i.path}`).join("<br>") || "（无）";
+  const vids = (m.videos||[]).map(v=>`· ${v.path}`).join("<br>") || "（无）";
+  const hd = m.human_decision ? `<div class="k">人工裁决</div><div class="v">${m.human_decision.action}（${m.human_decision.comment||""}）</div>` : "";
+  $("#modal-root").innerHTML = `
+    <div class="modal-mask" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-head"><b>房源基本信息 · ${m.audit_id}</b><button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="modal-body">
+          <div class="kv">
+            <div class="k">当前状态</div><div class="v">${m.verdict||"审核中"}${m.score!=null?` · 置信度 ${m.score}`:""}</div>
+            ${hd}
+            <div class="k">策略版本</div><div class="v">${m.policy_version||"-"}</div>
+          </div>
+          <h3>提交审核的房源信息</h3>
+          <div class="kv">${formRows}
+            <div class="k">实拍图片</div><div class="v">${(m.images||[]).length} 张</div>
+            <div class="k">实拍视频</div><div class="v">${(m.videos||[]).length} 个</div>
+          </div>
+          ${(m.missing_materials||[]).length?`<h3>缺失材料</h3><div class="hint">${m.missing_materials.join("；")}</div>`:""}
+          <h3>材料清单</h3>
+          <div class="file-list">图片：<br>${imgs}<br>视频：<br>${vids}</div>
+        </div>
+      </div>
+    </div>`;
+}
+function closeModal(){ $("#modal-root").innerHTML = ""; }
+
+async function resumeGov(id){
+  const r = await fetch(`/audit/${id}/gov-callback`, {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"}).then(r=>r.json());
+  if(r.detail) return alert(r.detail);
+  loadPending(); loadStats();
+}
+async function resumeSupp(id){
+  const r = await fetch(`/audit/${id}/supplement`, {method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({fields:{images:[{path:"images/sup/1.jpg", mock:{authenticity:0.96, phash:"ab12cd34ef567890", is_duplicate:false, detected_rooms:2, ocr_text:""}}]}})}).then(r=>r.json());
+  if(r.detail) return alert(r.detail);
+  loadPending(); loadStats();
+}
+
+async function loadListings(){
+  const src = $("#src-filter").value;
+  const rows = await fetch(`/listings?source=${src}`).then(r=>r.json());
+  const tb = $("#listings-table");
+  tb.innerHTML = `<tr><th>房源</th><th>小区/城市</th><th>月租</th><th>户型/面积</th><th style="width:110px">上架方式</th><th>置信度</th><th>审核单号</th><th>上架时间</th><th style="width:150px">操作</th></tr>`;
+  $("#listings-empty").style.display = rows.length ? "none" : "";
+  rows.forEach(r=>{
+    const l = r.listing||{};
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${l.title||"-"}</td>
+      <td>${l.community||"-"} · ${l.city||""}</td>
+      <td>¥${l.price||"-"}/月</td>
+      <td>${l.rooms||"-"}室 ${l.area||"-"}㎡</td>
+      <td><span class="src-tag ${r.source==="auto"?"s-auto":"s-human"}">${r.source==="auto"?"自动核验":"人工放行"}</span></td>
+      <td>${r.score!=null?r.score:"-"}</td>
+      <td class="hint">${r.audit_id}</td>
+      <td class="hint">${r.ts}</td>
+      <td><button onclick="showMaterial('${r.audit_id}')">房源基本信息查询</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+loadStats(); loadFixtures();
+</script>
+</body>
+</html>

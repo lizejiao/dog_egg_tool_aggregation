@@ -1,0 +1,7 @@
+# voice-script-studio 运行依赖（仅基础工具库，无编排框架）
+fastapi>=0.115
+uvicorn>=0.30
+python-multipart>=0.0.9
+requests>=2.31
+lameenc>=1.9.0      # MP3 导出编码（纯 LAME wheel，无系统依赖）
+httpx>=0.27        # fastapi TestClient 所需（测试用）

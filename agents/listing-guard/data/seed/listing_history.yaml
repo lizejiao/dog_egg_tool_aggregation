@@ -1,0 +1,22 @@
+# 历史房源库（demo 种子）：房源级查重的比对基准（生产为 ES/MySQL）
+# listing_code 为平台内唯一房源编码
+listings:
+  - listing_code: LST-2025-118762
+    community_id: C002
+    title_hash: "丽都一品 精装两居 拎包入住"
+    rooms: 2
+    area: 92
+    price: 8500
+    agent_id: AGT001
+    phashes: ["f60708a1b2c3d4e5"]
+    status: online
+
+  - listing_code: LST-2026-020315
+    community_id: C003
+    title_hash: "天通苑北一区 超低价一居 先到先得"
+    rooms: 1
+    area: 55
+    price: 1800
+    agent_id: AGT005
+    phashes: ["9a8b7c6d5e4f3021"]
+    status: online

@@ -1,0 +1,27 @@
+{
+  "case_id": "gov_timeout_09",
+  "expected": "pass",
+  "note": "算子降级：政府核验超时未返回，该因子标记 degraded 并从权重分母剔除重归一化，不阻断、不误杀",
+  "gov_status": "timeout",
+  "human_decision": {"action": "approve", "comment": "ok"},
+  "supplement": null,
+  "listing": {
+    "title": "望京西园 两居室 精装修",
+    "city": "北京",
+    "community": "望京西园",
+    "community_id": "C001",
+    "price": 6800,
+    "rooms": 2,
+    "area": 88,
+    "floor": 7,
+    "total_floors": 18,
+    "orientation": "南",
+    "gps": [116.4610, 39.9959],
+    "agent_id": "AGT001",
+    "description": "精装两居，近地铁，随时入住。",
+    "images": [
+      {"path": "images/gov_timeout_09/1.jpg", "mock": {"authenticity": 0.98, "phash": "801a2b3c4d5e6f70", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}},
+      {"path": "images/gov_timeout_09/2.jpg", "mock": {"authenticity": 0.97, "phash": "91a2b3c4d5e6f708", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}}
+    ]
+  }
+}

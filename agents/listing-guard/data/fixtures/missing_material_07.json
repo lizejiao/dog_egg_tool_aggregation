@@ -1,0 +1,29 @@
+{
+  "case_id": "missing_material_07",
+  "expected": "pass",
+  "note": "缺材料：无实拍图，挂起等待房东补拍；补拍后从断点续跑（已完成算子不重算）",
+  "gov_status": "passed",
+  "human_decision": {"action": "approve", "comment": "ok"},
+  "supplement": {
+    "images": [
+      {"path": "images/missing_material_07/1.jpg", "mock": {"authenticity": 0.96, "phash": "4d5e6f70801a2b3c", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}},
+      {"path": "images/missing_material_07/2.jpg", "mock": {"authenticity": 0.95, "phash": "5e6f70801a2b3c4d", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}}
+    ]
+  },
+  "listing": {
+    "title": "回龙观东大街小区 两居室 自住装修",
+    "city": "北京",
+    "community": "回龙观东大街小区",
+    "community_id": "C004",
+    "price": 4800,
+    "rooms": 2,
+    "area": 78,
+    "floor": 6,
+    "total_floors": 15,
+    "orientation": "南北",
+    "gps": [116.3408, 40.0733],
+    "agent_id": "AGT004",
+    "description": "自住装修两居室，保养很好，看房提前约。",
+    "images": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "case_id": "price_anomaly_02",
+  "expected": "review",
+  "note": "价格远低于同小区价格带，疑似钓鱼房源，落中间地带转人工",
+  "gov_status": "passed",
+  "human_decision": {
+    "action": "approve",
+    "comment": "核实为房东急租，价格属实"
+  },
+  "supplement": null,
+  "listing": {
+    "title": "天通苑北一区 超低价一居 先到先得",
+    "city": "北京",
+    "community": "天通苑北一区",
+    "community_id": "C003",
+    "price": 1800,
+    "rooms": 1,
+    "area": 55,
+    "floor": 3,
+    "total_floors": 18,
+    "orientation": "南",
+    "gps": [
+      116.4185,
+      40.0762
+    ],
+    "agent_id": "AGT002",
+    "description": "一居室，采光好，低价出租，长租优先。",
+    "images": [
+      {
+        "path": "images/price_anomaly_02/1.jpg",
+        "mock": {
+          "authenticity": 0.85,
+          "phash": "d4e5f60708a1b2c3",
+          "is_duplicate": false,
+          "detected_rooms": 1,
+          "ocr_text": ""
+        }
+      },
+      {
+        "path": "images/price_anomaly_02/2.jpg",
+        "mock": {
+          "authenticity": 0.85,
+          "phash": "e5f60708a1b2c3d4",
+          "is_duplicate": false,
+          "detected_rooms": 1,
+          "ocr_text": ""
+        }
+      }
+    ]
+  }
+}

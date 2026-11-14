@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业级支付系统架构图 · 信贷消金场景</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --c-access:  #2563eb;   /* 接入层 蓝 */
+    --c-gateway: #4f46e5;   /* 网关 靛 */
+    --c-biz:     #7c3aed;   /* 业务层 紫 */
+    --c-route:   #0f766e;   /* 路由 青 */
+    --c-channel: #c2410c;   /* 通道 橙 */
+    --c-ext:     #475569;   /* 外部渠道 灰蓝 */
+    --c-account: #be123c;   /* 账务 玫红 */
+    --c-support: #047857;   /* 支撑 绿 */
+    --c-infra:   #334155;   /* 基础设施 深灰 */
+    --txt-1: #1e293b;
+    --txt-2: #475569;
+    --txt-3: #64748b;
+    --bg: #f1f5f9;
+    --line: #e2e8f0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--txt-1);
+    padding: 32px 16px 48px;
+    line-height: 1.55;
+  }
+
+  .page { max-width: 1280px; margin: 0 auto; }
+
+  /* ============ Header ============ */
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #0f766e 100%);
+    border-radius: 16px;
+    padding: 36px 40px;
+    color: #fff;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .18);
+  }
+  header .tag {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 2px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 999px;
+    padding: 3px 14px;
+    margin-bottom: 14px;
+    color: rgba(255,255,255,.85);
+  }
+  header h1 { font-size: 30px; font-weight: 700; letter-spacing: 1px; }
+  header p.sub { margin-top: 10px; font-size: 14px; color: rgba(255,255,255,.82); max-width: 880px; }
+  header .chips { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  header .chip {
+    font-size: 12px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.22);
+    padding: 4px 12px;
+    border-radius: 6px;
+    color: rgba(255,255,255,.92);
+  }
+
+  /* ============ Section ============ */
+  section.block {
+    background: #fff;
+    border-radius: 14px;
+    padding: 26px 30px 30px;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .05);
+  }
+  section.block > h2 {
+    font-size: 19px;
+    font-weight: 700;
+    padding-left: 12px;
+    border-left: 4px solid var(--c-access);
+    margin-bottom: 6px;
+  }
+  section.block > p.desc { font-size: 13px; color: var(--txt-3); margin-bottom: 20px; padding-left: 16px; }
+
+  /* ============ 业务定位 ============ */
+  .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .pos-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    background: linear-gradient(180deg, #f8fafc, #fff);
+  }
+  .pos-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .pos-card h3 .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .pos-card ul { list-style: none; }
+  .pos-card li { font-size: 12.5px; color: var(--txt-2); padding: 2.5px 0; }
+  .pos-card li::before { content: "·"; margin-right: 6px; font-weight: 700; color: var(--txt-3); }
+
+  /* ============ 架构图 layer ============ */
+  .layer { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  .layer + .arrow-row { margin: 0; }
+  .rail {
+    width: 118px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    color: #fff;
+    padding: 14px 8px;
+  }
+  .rail .no { font-size: 11px; opacity: .75; letter-spacing: 1.5px; }
+  .rail b { font-size: 14.5px; font-weight: 700; }
+  .rail i { font-size: 10px; opacity: .7; font-style: normal; letter-spacing: .5px; }
+  .rail-bg-access  { background: linear-gradient(160deg, #3b82f6, var(--c-access)); }
+  .rail-bg-gateway { background: linear-gradient(160deg, #6366f1, var(--c-gateway)); }
+  .rail-bg-biz     { background: linear-gradient(160deg, #8b5cf6, var(--c-biz)); }
+  .rail-bg-route   { background: linear-gradient(160deg, #14b8a6, var(--c-route)); }
+  .rail-bg-channel { background: linear-gradient(160deg, #f97316, var(--c-channel)); }
+  .rail-bg-ext     { background: linear-gradient(160deg, #64748b, var(--c-ext)); }
+  .rail-bg-account { background: linear-gradient(160deg, #f43f5e, var(--c-account)); }
+  .rail-bg-support { background: linear-gradient(160deg, #10b981, var(--c-support)); }
+  .rail-bg-infra   { background: linear-gradient(160deg, #475569, var(--c-infra)); }
+
+  .layer-body { flex: 1; background: #fff; padding: 14px 16px; border-left: none; }
+  .layer-body .cap {
+    font-size: 12px;
+    color: var(--txt-3);
+    margin-bottom: 10px;
+  }
+  .layer-body .cap b { color: var(--txt-2); font-weight: 600; }
+
+  .cards { display: grid; gap: 10px; }
+  .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fff;
+    position: relative;
+    transition: box-shadow .15s;
+  }
+  .card:hover { box-shadow: 0 4px 14px rgba(15, 23, 42, .10); }
+  .card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .card p { font-size: 11.5px; color: var(--txt-3); }
+
+  .edge-access  { border-top: 3px solid var(--c-access); }
+  .edge-gateway { border-top: 3px solid var(--c-gateway); }
+  .edge-biz     { border-top: 3px solid var(--c-biz); }
+  .edge-route   { border-top: 3px solid var(--c-route); }
+  .edge-channel { border-top: 3px solid var(--c-channel); }
+  .edge-ext     { border-top: 3px solid var(--c-ext); }
+  .edge-account { border-top: 3px solid var(--c-account); }
+  .edge-support { border-top: 3px solid var(--c-support); }
+  .edge-infra   { border-top: 3px solid var(--c-infra); }
+
+  .card .tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .card .tags span {
+    font-size: 10.5px;
+    background: #f1f5f9;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--txt-2);
+  }
+
+  .card.wide { grid-column: span 2; }
+  .card.wide-3 { grid-column: span 3; }
+
+  /* 内嵌分组标题 */
+  .sub-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--txt-3);
+    letter-spacing: 1px;
+    margin: 4px 2px 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sub-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .mt8 { margin-top: 10px; }
+
+  /* 层间箭头 */
+  .arrow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 7px 0;
+    color: var(--txt-3);
+    font-size: 11.5px;
+  }
+  .arrow-row .arr { font-size: 13px; color: #94a3b8; }
+  .arrow-row .lbl {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 999px;
+    padding: 2px 12px;
+  }
+
+  /* ============ 路由因子 ============ */
+  .route-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .route-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, #f0fdfa, #fff);
+  }
+  .route-card h4 { font-size: 13.5px; font-weight: 700; color: var(--c-route); margin-bottom: 6px; }
+  .route-card p { font-size: 12px; color: var(--txt-2); }
+  .route-formula {
+    margin-top: 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #134e4a, #0f766e);
+    color: #fff;
+    padding: 16px 20px;
+    font-size: 13px;
+    text-align: center;
+    letter-spacing: .5px;
+  }
+  .route-formula b { color: #5eead4; }
+
+  /* ============ 流程 ============ */
+  .flow-wrap { overflow-x: auto; padding-bottom: 6px; }
+  .flow { display: flex; align-items: stretch; gap: 0; min-width: 980px; }
+  .step {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 10px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+    min-width: 118px;
+  }
+  .step .no {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .step h5 { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
+  .step p { font-size: 10.5px; color: var(--txt-3); }
+  .flow .conn {
+    flex: none;
+    width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 14px;
+  }
+  .flow-title { font-size: 14px; font-weight: 700; margin: 18px 0 10px; display: flex; align-items: center; gap: 8px; }
+  .flow-title .badge {
+    font-size: 11px;
+    color: #fff;
+    border-radius: 5px;
+    padding: 2px 9px;
+    font-weight: 600;
+  }
+
+  /* ============ 安全保障 ============ */
+  .safe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .safe-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: #fff; border-top: 3px solid var(--c-account); }
+  .safe-card h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 7px; }
+  .safe-card ul { list-style: none; }
+  .safe-card li { font-size: 12px; color: var(--txt-2); padding: 3px 0 3px 16px; position: relative; }
+  .safe-card li::before { content: "✓"; position: absolute; left: 0; color: var(--c-account); font-weight: 700; }
+
+  /* ============ 模块清单表 ============ */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    background: #0f172a;
+    color: #fff;
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--line); color: var(--txt-2); vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  td.mod { font-weight: 700; color: var(--txt-1); white-space: nowrap; }
+  td .mini { display: inline-block; font-size: 10.5px; border-radius: 4px; padding: 1px 7px; margin-left: 6px; color: #fff; }
+
+  footer { text-align: center; font-size: 12px; color: var(--txt-3); padding: 8px 0 0; }
+
+  @media (max-width: 980px) {
+    .cols-6, .cols-5, .cols-4 { grid-template-columns: repeat(3, 1fr); }
+    .pos-grid, .route-grid, .safe-grid { grid-template-columns: 1fr; }
+    .card.wide, .card.wide-3 { grid-column: span 1; }
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    section.block { box-shadow: none; page-break-inside: avoid; }
+    .flow-wrap { overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ================= Header ================= -->
+  <header>
+    <span class="tag">ARCHITECTURE BLUEPRINT</span>
+    <h1>企业级支付系统架构 · 智能路由与多通道银行对接</h1>
+    <p class="sub">
+      面向持牌消费金融场景的资金执行层设计：承接信贷核心的<b>放款（代付）</b>与<b>还款（代扣 / 批扣）</b>两大资金动作，
+      维护「收款特约商户账户 + 放款支付账户」双账户体系，通过适配器模式统一封装银联 / 网联 / 银行直连 / 第三方支付通道，
+      以微服务 + 规则引擎实现智能路由择优，全链路保障资金安全与账务最终一致。
+    </p>
+    <div class="chips">
+      <span class="chip">微服务架构</span>
+      <span class="chip">适配器模式 · 配置化接入</span>
+      <span class="chip">规则引擎智能路由</span>
+      <span class="chip">状态机驱动</span>
+      <span class="chip">全链路幂等</span>
+      <span class="chip">最终一致性</span>
+      <span class="chip">差错池 / 挂账</span>
+      <span class="chip">符合《银行卡收单业务管理办法》</span>
+    </div>
+  </header>
+
+  <!-- ================= 业务定位 ================= -->
+  <section class="block">
+    <h2>业务定位与双账户体系</h2>
+    <p class="desc">支付系统是信贷核心的资金执行层，向上承接业务指令，向下屏蔽通道差异，横向保障账实一致。</p>
+    <div class="pos-grid">
+      <div class="pos-card">
+        <h3><span class="dot" style="background:var(--c-biz)"></span>资金执行层定位</h3>
+        <ul>
+          <li>承接信贷核心放款指令，执行<b>代付出款</b></li>
+          <li>承接还款计划 / 催收指令，执行<b>代扣、批量代扣</b></li>
+          <li>交易结果实时回流信贷核心，驱动额度与账务状态</li>
+          <li>对借款人提供快捷支付、协议支付等主动还款能力</li>
+        </ul>
+      </div>
+      <div class="pos-card">
+        <h3><span class="dot" style="background:var(--c-account)"></span>双账户体系</h3>
+        <ul>
+          <li><b>收款特约商户账户</b>：还款代扣资金入账户，遵从收单管理办法结算约束</li>
+          <li><b>放款支付账户</b>：资金方（自有资金 / 消金主体）放款出金账户</li>
+          <li>账户余额 / 日终核对，资金划拨与结算路径分户管理</li>
+          <li>支持多资金方、多主体、多渠道账户并行</li>
+        </ul>
+      </div>
+      <div class="pos-card">
+        <h3><span class="dot" style="background:var(--c-route)"></span>核心建设目标</h3>
+        <ul>
+          <li><b>高可用</b>：多通道冗余，异常自动降级熔断</li>
+          <li><b>高成功率</b>：智能路由 + 错峰重扣降低失败率</li>
+          <li><b>低成本</b>：费率 / 限额因子动态择优</li>
+          <li><b>零资损</b>：幂等 + 状态机 + 对账 + 差错池闭环</li>
+          <li><b>快接入</b>：新通道配置化上线，无需改码</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 总体架构 ================= -->
+  <section class="block">
+    <h2>总体分层架构</h2>
+    <p class="desc">自上而下：业务接入 → 统一网关 → 支付业务中台 → 智能路由 → 通道适配 → 外部清算渠道；资金账务体系并行消费支付结果，横向支撑体系与基础设施托底。</p>
+
+    <!-- 01 业务接入层 -->
+    <div class="layer">
+      <div class="rail rail-bg-access"><span class="no">LAYER 01</span><b>业务接入层</b><i>Access</i></div>
+      <div class="layer-body">
+        <div class="cap">支付能力的<b>指令来源方</b>，通过统一 API / MQ 下发支付指令</div>
+        <div class="cards cols-5">
+          <div class="card edge-access"><h4>信贷核心系统</h4><p>放款指令 · 还款计划 · 提前结清 · 逾期扣款</p></div>
+          <div class="card edge-access"><h4>借款人端 APP / H5</h4><p>主动还款 · 绑卡 · 快捷 / 协议支付</p></div>
+          <div class="card edge-access"><h4>催收系统</h4><p>批量扣款任务 · 扣款结果回流</p></div>
+          <div class="card edge-access"><h4>资金方 / 助贷平台</h4><p>联合贷出资指令 · 分润结算依据</p></div>
+          <div class="card edge-access"><h4>运营 / 客服后台</h4><p>交易查询 · 差错复核 · 退款审批</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><span class="arr">▼</span><span class="lbl">统一 API 调用 · 验签鉴权 · 指令校验</span><span class="arr">▼</span></div>
+
+    <!-- 02 统一支付网关 -->
+    <div class="layer">
+      <div class="rail rail-bg-gateway"><span class="no">LAYER 02</span><b>统一支付网关</b><i>Gateway</i></div>
+      <div class="layer-body">
+        <div class="cap">所有支付流量的<b>唯一入口</b>，负责协议适配、安全与流量治理</div>
+        <div class="cards cols-5">
+          <div class="card edge-gateway"><h4>统一 API / 开放接口</h4><p>标准 REST 接口 · SDK · 报错码统一</p></div>
+          <div class="card edge-gateway"><h4>验签与鉴权</h4><p>应用签名 · IP 白名单 · 权限校验</p></div>
+          <div class="card edge-gateway"><h4>幂等控制</h4><p>支付流水号 + 业务单号<b>双重去重</b></p></div>
+          <div class="card edge-gateway"><h4>限流 / 熔断</h4><p>接口限流 · 并发控制 · 慢调用隔离</p></div>
+          <div class="card edge-gateway"><h4>敏感信息保护</h4><p>卡号 / 证件加密传输 · 防重放攻击</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><span class="arr">▼</span><span class="lbl">指令解析 · 创建支付单</span><span class="arr">▼</span></div>
+
+    <!-- 03 支付业务层 -->
+    <div class="layer">
+      <div class="rail rail-bg-biz"><span class="no">LAYER 03</span><b>支付业务中台</b><i>Payment Core</i></div>
+      <div class="layer-body">
+        <div class="cap">支付领域<b>核心服务群</b>，状态机驱动交易全生命周期流转</div>
+        <div class="cards cols-4">
+          <div class="card edge-biz"><h4>支付订单中心</h4><p>支付单生命周期管理 · 交易状态机（待支付→处理中→成功/失败/未知）</p><div class="tags"><span>状态机</span><span>流水查询</span></div></div>
+          <div class="card edge-biz"><h4>放款代付服务</h4><p>单笔实时代付 · 批量代付文件 · 出款复核</p><div class="tags"><span>代付</span><span>批量出款</span></div></div>
+          <div class="card edge-biz"><h4>还款代扣服务</h4><p>单笔实时代扣 · <b>批量代扣（批扣）</b> · 失败重扣调度 · 错峰扣款</p><div class="tags"><span>代扣</span><span>批扣</span><span>错峰重扣</span></div></div>
+          <div class="card edge-biz"><h4>快捷 / 协议支付</h4><p>收银台聚合 · 免密协议支付 · 主动还款</p><div class="tags"><span>快捷</span><span>协议支付</span></div></div>
+          <div class="card edge-biz"><h4>绑卡签约服务</h4><p>绑卡 · 签约 / 解约 · 签约关系查询 · 协议管理</p><div class="tags"><span>绑卡</span><span>签约管理</span></div></div>
+          <div class="card edge-biz"><h4>鉴权服务</h4><p>四要素鉴权（姓名 / 证件 / 卡号 / 手机）· <b>卡 BIN 识别</b>发卡行 · 卡种 · 对公对私</p><div class="tags"><span>四要素</span><span>卡BIN</span></div></div>
+          <div class="card edge-biz"><h4>退款 / 冲正服务</h4><p>原路退款 · 交易冲正 · 退款状态跟踪</p><div class="tags"><span>原路退款</span><span>冲正</span></div></div>
+          <div class="card edge-biz"><h4>通知与回调</h4><p>支付结果异步通知信贷核心 · 通知补偿重发</p><div class="tags"><span>可靠通知</span><span>补偿</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><span class="arr">▼</span><span class="lbl">发起通道请求 · 路由决策</span><span class="arr">▼</span></div>
+
+    <!-- 04 智能路由层 -->
+    <div class="layer">
+      <div class="rail rail-bg-route"><span class="no">LAYER 04</span><b>智能路由中心</b><i>Smart Routing</i></div>
+      <div class="layer-body">
+        <div class="cap">微服务 + 规则引擎，多维因子<b>动态打分择优选路</b>，在成本与成功率间自动取最优解</div>
+        <div class="cards cols-4">
+          <div class="card edge-route"><h4>路由决策引擎</h4><p>规则引擎（准入 + 打分）· 路由因子编排 · 灰度切流策略</p></div>
+          <div class="card edge-route"><h4>通道健康度监测</h4><p>实时成功率（滑动窗口）· 响应时延 · 可用性探测 · 历史质量画像</p></div>
+          <div class="card edge-route"><h4>熔断与降级</h4><p>异常通道自动<b>熔断</b> · 降级标记 · 备用通道无缝切换 · 避开维护窗口</p></div>
+          <div class="card edge-route"><h4>重试调度中心</h4><p>失败原因分类（余额不足 / 超限 / 超时 / 清算异常）· 重试策略 · <b>错峰重扣</b>退避</p></div>
+        </div>
+        <div class="sub-title mt8">路由决策因子</div>
+        <div class="cards cols-6 mt8">
+          <div class="card edge-route"><h4>手续费成本</h4><p>单笔费率 · 封顶策略</p></div>
+          <div class="card edge-route"><h4>通道优先级</h4><p>运营配置权重</p></div>
+          <div class="card edge-route"><h4>成功率 / 健康度</h4><p>实时统计动态评分</p></div>
+          <div class="card edge-route"><h4>响应时延</h4><p>TP99 监控采样</p></div>
+          <div class="card edge-route"><h4>限额匹配</h4><p>单笔 / 单日 / 单月限额</p></div>
+          <div class="card edge-route"><h4>卡种与交易类型</h4><p>借记 / 贷记 · 代付 / 代扣匹配</p></div>
+          <div class="card edge-route wide"><h4>签约状态约束</h4><p>协议支付 / 代扣需有效签约关系，按签约渠道收窄可路由集合</p></div>
+          <div class="card edge-route wide"><h4>通道维护窗口</h4><p>计划性维护 / 夜间窗口自动屏蔽，防止失败请求空转</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><span class="arr">▼</span><span class="lbl">选定通道 · 下发标准指令</span><span class="arr">▼</span></div>
+
+    <!-- 05 通道适配层 -->
+    <div class="layer">
+      <div class="rail rail-bg-channel"><span class="no">LAYER 05</span><b>通道网关（适配层）</b><i>Channel Gateway</i></div>
+      <div class="layer-body">
+        <div class="cap"><b>适配器模式</b>屏蔽各渠道报文格式、同步 / 异步回执、结算周期差异 —— 新通道<b>配置化接入、无需改码</b></div>
+        <div class="cards cols-4">
+          <div class="card edge-channel"><h4>统一标准接口</h4><p>代付 · 单笔代扣 · 批量代扣 · 快捷支付 · 协议支付 · 绑卡 · 四要素 · 查询 · 冲正 · 退款</p><div class="tags"><span>能力标准化</span><span>报错码归一</span></div></div>
+          <div class="card edge-channel"><h4>渠道适配器簇</h4><p>银联适配器 · 网联适配器 · 银行直连适配器 · 第三方支付适配器（可插拔 SPI 扩展）</p><div class="tags"><span>Adapter</span><span>热插拔</span></div></div>
+          <div class="card edge-channel"><h4>报文与协议转换</h4><p>ISO 8583 / HTTP-XML / JSON / 批量文件 · 字段映射 · 渠道专属报文组装</p><div class="tags"><span>8583</span><span>文件交换</span></div></div>
+          <div class="card edge-channel"><h4>安全加密组件</h4><p>证书密钥分级管理 · 加签 / 验签 · 敏感字段加密（卡号 PIN / CVV 不落明文）</p><div class="tags"><span>证书管理</span><span>国密/RSA</span></div></div>
+          <div class="card edge-channel"><h4>异步回执处理</h4><p>渠道回调接收 · 回执验签 · 结果解析归一 · 超时未明主动查询</p></div>
+          <div class="card edge-channel"><h4>对账文件引擎</h4><p>渠道账单定时拉取（T+1）· 文件解析归一 · 供对账中心消费</p></div>
+          <div class="card edge-channel wide-3"><h4>渠道参数配置中心（可视化）</h4><p>渠道参数 · 签约要素 · 证书密钥 · 限额策略 · 维护窗口在线配置，支撑通道快速上线与灰度切流</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><span class="arr">▼</span><span class="lbl">专线 / 互联网 · 加密报文交互</span><span class="arr">▼</span></div>
+
+    <!-- 06 外部渠道 -->
+    <div class="layer">
+      <div class="rail rail-bg-ext"><span class="no">LAYER 06</span><b>外部清算渠道</b><i>External</i></div>
+      <div class="layer-body">
+        <div class="cap">支付指令的<b>最终执行网络</b>，覆盖清算组织、银行与持牌支付机构</div>
+        <div class="cards cols-4">
+          <div class="card edge-ext"><h4>银联通道</h4><p>代付 · 代扣（无卡）· 快捷支付 · 跨行清算</p></div>
+          <div class="card edge-ext"><h4>网联通道</h4><p>协议支付代扣 · 绑卡签约合规清算路径</p></div>
+          <div class="card edge-ext"><h4>银行直连通道</h4><p>大型国有行 / 股份行 / 城商行 · 大小额 · 超级网银 · 本行代扣</p></div>
+          <div class="card edge-ext"><h4>第三方支付机构</h4><p>支付宝 / 微信支付 / 连连 / 易宝 / 快钱等持牌机构通道</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><span class="arr">▼</span><span class="lbl">支付结果事件（可靠消息 MQ）· 并行消费</span><span class="arr">▼</span></div>
+
+    <!-- 07 资金账务体系 -->
+    <div class="layer">
+      <div class="rail rail-bg-account"><span class="no">LAYER 07</span><b>资金账务体系</b><i>Accounting &amp; Settlement</i></div>
+      <div class="layer-body">
+        <div class="cap">「本地事务 + 可靠消息 + 定时补偿」保障<b>支付与账务最终一致</b>，差错闭环杜绝资损</div>
+        <div class="cards cols-4">
+          <div class="card edge-account"><h4>账务核心</h4><p>复式记账 · 内部分户 · 客户 / 渠道 / 资金方多维度账</p></div>
+          <div class="card edge-account"><h4>双账户管理</h4><p>收款特约商户账户（还款入账）· 放款支付账户（资金方出款）· 余额与在途管理</p></div>
+          <div class="card edge-account"><h4>对账中心</h4><p>渠道对账（T+1 账单）· 内部账账核对 · 账实核对 · 长短款识别</p></div>
+          <div class="card edge-account"><h4>清算结算</h4><p>T+1 结算处理 · 资金划拨指令 · 结算单生成 · 收单管理办法合规约束</p></div>
+          <div class="card edge-account wide-3" style="border-top-color:#b91c1c"><h4>差错处理中心（差错池 / 挂账）</h4>
+            <p>退票 · 重复扣款 · 长短款 · 超时未明等异常自动识别入池 → 挂账登记 → 人工复核 → 冲正 / 原路退款闭环处理，全程留痕可审计</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 08 支撑体系 -->
+    <div class="layer mt8" style="margin-top:12px">
+      <div class="rail rail-bg-support"><span class="no">LAYER 08</span><b>横向支撑体系</b><i>Support</i></div>
+      <div class="layer-body">
+        <div class="cards cols-5">
+          <div class="card edge-support"><h4>运营配置平台</h4><p>渠道 / 限额 / 费率 / 路由规则可视化配置 · 灰度切流</p></div>
+          <div class="card edge-support"><h4>监控告警</h4><p>交易大盘 · 通道成功率 · 时延 · 资损类告警秒级触达</p></div>
+          <div class="card edge-support"><h4>数据与报表</h4><p>交易报表 · 通道成本 / 成功率分析 · 稽核取数</p></div>
+          <div class="card edge-support"><h4>安全合规</h4><p>银行卡号脱敏存储 · 密钥分级管理 · 操作审计 · 合规报送</p></div>
+          <div class="card edge-support"><h4>风控拦截</h4><p>黑名单 · 异常交易识别 · 限额硬控 · 可疑交易拦截</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 09 基础设施 -->
+    <div class="layer" style="margin-top:12px">
+      <div class="rail rail-bg-infra"><span class="no">LAYER 09</span><b>基础设施层</b><i>Infrastructure</i></div>
+      <div class="layer-body">
+        <div class="cards cols-5">
+          <div class="card edge-infra"><h4>微服务框架</h4><p>Spring Cloud / Dubbo · 注册发现 · 链路追踪</p></div>
+          <div class="card edge-infra"><h4>消息队列</h4><p>可靠消息 · 事务消息 · 事件驱动解耦</p></div>
+          <div class="card edge-infra"><h4>数据库</h4><p>支付流水分库分表 · 热冷数据分离 · 归档</p></div>
+          <div class="card edge-infra"><h4>缓存 / 高并发</h4><p>Redis 集群 · 幂等去重 · 通道热点缓存</p></div>
+          <div class="card edge-infra"><h4>任务调度</h4><p>批扣调度 · 补偿任务 · 对账调度 · 重试调度</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 核心流程 ================= -->
+  <section class="block">
+    <h2>核心业务流程</h2>
+    <p class="desc">放款（代付）与还款（代扣 / 批扣）两条主干资金链路的端到端流转。</p>
+
+    <div class="flow-title"><span class="badge" style="background:var(--c-biz)">流程 A</span>放款 · 代付出款</div>
+    <div class="flow-wrap">
+      <div class="flow">
+        <div class="step edge-biz"><span class="no" style="background:var(--c-biz)">1</span><h5>信贷核心放款指令</h5><p>额度生效后下发代付指令（借款合同 + 收款卡）</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-gateway"><span class="no" style="background:var(--c-gateway)">2</span><h5>网关幂等校验</h5><p>支付流水号 + 业务单号双重去重</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-biz"><span class="no" style="background:var(--c-biz)">3</span><h5>创建支付单</h5><p>状态机置「处理中」· 卡 BIN 校验准入</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-route"><span class="no" style="background:var(--c-route)">4</span><h5>智能路由选路</h5><p>成本 / 成功率 / 限额 / 维护窗口综合打分</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-channel"><span class="no" style="background:var(--c-channel)">5</span><h5>通道适配器代付</h5><p>报文组装 · 加签加密 · 出款复核放行</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-ext"><span class="no" style="background:var(--c-ext)">6</span><h5>银联 / 银行清算</h5><p>资金方账户出金 → 借款人到账</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-channel"><span class="no" style="background:var(--c-channel)">7</span><h5>回执处理</h5><p>同步 / 异步回执 · 超时未明主动查询</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-account"><span class="no" style="background:var(--c-account)">8</span><h5>状态推进 + 记账</h5><p>通知信贷核心 · 账务入账 · 进入对账差错保障</p></div>
+      </div>
+    </div>
+
+    <div class="flow-title"><span class="badge" style="background:var(--c-route)">流程 B</span>还款 · 单笔 / 批量代扣（含失败重扣闭环）</div>
+    <div class="flow-wrap">
+      <div class="flow">
+        <div class="step edge-access"><span class="no" style="background:var(--c-access)">1</span><h5>还款指令生成</h5><p>还款日批量计划 / APP 主动还款 / 催收扣款</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-biz"><span class="no" style="background:var(--c-biz)">2</span><h5>签约关系校验</h5><p>绑卡有效 · 协议签约渠道匹配</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-route"><span class="no" style="background:var(--c-route)">3</span><h5>路由择优选路</h5><p>签约约束 + 成功率 + 成本综合决策</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-channel"><span class="no" style="background:var(--c-channel)">4</span><h5>代扣 / 批扣执行</h5><p>单笔实时 · 批量文件提交渠道清算</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-route"><span class="no" style="background:var(--c-route)">5</span><h5>失败重扣闭环</h5><p>余额不足 / 超限分类 → 错峰重扣策略再执行</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-account"><span class="no" style="background:var(--c-account)">6</span><h5>入账特约商户账户</h5><p>扣款成功资金入收款户</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-account"><span class="no" style="background:var(--c-account)">7</span><h5>T+1 对账结算</h5><p>渠道账单核对 · 长短款识别</p></div>
+        <div class="conn">→</div>
+        <div class="step edge-account" style="border-top-color:#b91c1c"><span class="no" style="background:#b91c1c">8</span><h5>差错池闭环</h5><p>退票 / 重复扣款 / 未明 → 复核冲正原路退款</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 资金安全 ================= -->
+  <section class="block">
+    <h2>资金安全与一致性保障</h2>
+    <p class="desc">从幂等、状态、一致性机制、差错闭环、合规五个维度构建「零资损」防线。</p>
+    <div class="safe-grid">
+      <div class="safe-card">
+        <h4>全链路幂等设计</h4>
+        <ul>
+          <li>支付流水号 + 业务单号双重去重</li>
+          <li>网关层拦截重复指令，DB 唯一索引兜底</li>
+          <li>回调 / 通知重复投递幂等消费</li>
+          <li>重试请求复用原单，杜绝重复出款扣款</li>
+        </ul>
+      </div>
+      <div class="safe-card">
+        <h4>状态机驱动交易流转</h4>
+        <ul>
+          <li>待支付 → 处理中 → 成功 / 失败 / 未知</li>
+          <li>非法状态迁移拒绝，防状态跳跃错乱</li>
+          <li>超时未明自动「主动查询 + 补偿」收敛终态</li>
+          <li>终态变更串行化，保证事件顺序一致</li>
+        </ul>
+      </div>
+      <div class="safe-card">
+        <h4>跨系统最终一致性</h4>
+        <ul>
+          <li>本地事务 + 可靠消息（事务消息 / 本地消息表）</li>
+          <li>定时补偿任务扫描未闭环单据</li>
+          <li>对账兜底：T+1 渠道对账 + 内部账账核对</li>
+          <li>支付 ↔ 账务 ↔ 信贷核心三方金额一致</li>
+        </ul>
+      </div>
+      <div class="safe-card">
+        <h4>差错池与挂账机制</h4>
+        <ul>
+          <li>退票 / 重复扣款 / 长短款 / 超时未明自动入池</li>
+          <li>挂账登记 + 差错分类分级</li>
+          <li>人工复核工作台，冲正 / 原路退款一键执行</li>
+          <li>处理时效监控，杜绝差错沉淀为资损</li>
+        </ul>
+      </div>
+      <div class="safe-card">
+        <h4>通道容错与高可用</h4>
+        <ul>
+          <li>多通道冗余互备，熔断降级自动切流</li>
+          <li>维护窗口 / 异常通道自动屏蔽</li>
+          <li>错峰重扣降低集中失败与通道限流冲击</li>
+          <li>灰度切流控制新通道风险敞口</li>
+        </ul>
+      </div>
+      <div class="safe-card">
+        <h4>合规与审计</h4>
+        <ul>
+          <li>银行卡号脱敏存储、展示、日志全链路</li>
+          <li>证书密钥分级管理、定期轮换</li>
+          <li>遵守《银行卡收单业务管理办法》结算约束</li>
+          <li>操作留痕审计，满足监管检查要求</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 模块清单 ================= -->
+  <section class="block">
+    <h2>模块职责清单</h2>
+    <p class="desc">企业级支付系统的模块拆分与核心职责速览（可用于面试展开 / 简历对照）。</p>
+    <table>
+      <tr><th style="width:150px">模块</th><th style="width:90px">所属层次</th><th>核心职责</th></tr>
+      <tr><td class="mod">统一支付网关<span class="mini" style="background:var(--c-gateway)">网关</span></td><td>接入</td><td>统一 API、验签鉴权、限流熔断、幂等校验、敏感信息加密</td></tr>
+      <tr><td class="mod">支付订单中心<span class="mini" style="background:var(--c-biz)">业务</span></td><td>业务</td><td>支付单生命周期、交易状态机、流水查询、结果分发</td></tr>
+      <tr><td class="mod">放款代付服务<span class="mini" style="background:var(--c-biz)">业务</span></td><td>业务</td><td>单笔 / 批量代付、出款复核、放款结果回流</td></tr>
+      <tr><td class="mod">还款代扣服务<span class="mini" style="background:var(--c-biz)">业务</span></td><td>业务</td><td>单笔代扣、批量代扣（批扣）、错峰重扣、失败分类处理</td></tr>
+      <tr><td class="mod">绑卡签约服务<span class="mini" style="background:var(--c-biz)">业务</span></td><td>业务</td><td>绑卡、签约 / 解约、签约关系管理、协议有效性校验</td></tr>
+      <tr><td class="mod">鉴权服务<span class="mini" style="background:var(--c-biz)">业务</span></td><td>业务</td><td>四要素鉴权、卡 BIN 识别（发卡行 / 卡种 / 对公对私）</td></tr>
+      <tr><td class="mod">退款冲正服务<span class="mini" style="background:var(--c-biz)">业务</span></td><td>业务</td><td>原路退款、交易冲正、退款状态跟踪</td></tr>
+      <tr><td class="mod">智能路由中心<span class="mini" style="background:var(--c-route)">路由</span></td><td>路由</td><td>规则引擎打分选路、通道健康度、熔断降级、重试调度、灰度切流</td></tr>
+      <tr><td class="mod">通道网关<span class="mini" style="background:var(--c-channel)">通道</span></td><td>通道</td><td>适配器簇、标准能力封装、报文转换、安全加解密、回执处理、账单解析</td></tr>
+      <tr><td class="mod">渠道配置中心<span class="mini" style="background:var(--c-channel)">通道</span></td><td>通道</td><td>渠道参数 / 签约要素 / 证书密钥 / 限额策略可视化配置，配置化接入</td></tr>
+      <tr><td class="mod">账务核心<span class="mini" style="background:var(--c-account)">账务</span></td><td>账务</td><td>复式记账、内部分户、双账户体系（特约商户 + 放款户）管理</td></tr>
+      <tr><td class="mod">对账中心<span class="mini" style="background:var(--c-account)">账务</span></td><td>账务</td><td>渠道对账、内部对账、账实核对、长短款识别</td></tr>
+      <tr><td class="mod">清算结算<span class="mini" style="background:var(--c-account)">账务</span></td><td>账务</td><td>T+1 结算、资金划拨、结算单生成与合规约束落地</td></tr>
+      <tr><td class="mod">差错处理中心<span class="mini" style="background:#b91c1c">账务</span></td><td>账务</td><td>差错池、挂账、人工复核、冲正 / 原路退款闭环</td></tr>
+      <tr><td class="mod">运营配置平台<span class="mini" style="background:var(--c-support)">支撑</span></td><td>支撑</td><td>规则 / 费率 / 限额可视化配置、灰度切流、通道上下线管理</td></tr>
+      <tr><td class="mod">监控告警 / 报表<span class="mini" style="background:var(--c-support)">支撑</span></td><td>支撑</td><td>交易大盘、通道成功率 / 时延监控、资损告警、成本分析报表</td></tr>
+      <tr><td class="mod">安全合规<span class="mini" style="background:var(--c-support)">支撑</span></td><td>支撑</td><td>卡号脱敏、密钥分级、操作审计、监管合规报送</td></tr>
+    </table>
+  </section>
+
+  <footer>企业级支付系统架构图 · 智能支付路由与多通道银行对接 · 信贷消金场景 · 2026</footer>
+</div>
+</body>
+</html>

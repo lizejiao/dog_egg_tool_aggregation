@@ -1,0 +1,25 @@
+# 小区主数据：价格带（元/月）与坐标（经纬度）
+communities:
+  - id: C001
+    name: 望京西园
+    city: 北京
+    price_band: [5500, 9000]
+    coords: [116.461, 39.996]
+
+  - id: C002
+    name: 丽都一品
+    city: 北京
+    price_band: [7000, 12000]
+    coords: [116.475, 39.970]
+
+  - id: C003
+    name: 天通苑北一区
+    city: 北京
+    price_band: [3500, 5500]
+    coords: [116.418, 40.076]
+
+  - id: C004
+    name: 回龙观东大街小区
+    city: 北京
+    price_band: [3800, 5800]
+    coords: [116.340, 40.073]

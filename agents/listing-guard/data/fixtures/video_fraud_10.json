@@ -1,0 +1,30 @@
+{
+  "case_id": "video_fraud_10",
+  "expected": "reject",
+  "note": "视频造假：关键帧鉴伪低分（样板间视频冒充实拍），触发视频否决项直接驳回；ASR 转写还含联系方式",
+  "gov_status": "passed",
+  "human_decision": {"action": "approve", "comment": "-"},
+  "supplement": null,
+  "listing": {
+    "title": "回龙观东大街小区 两居室 实拍视频看房",
+    "city": "北京",
+    "community": "回龙观东大街小区",
+    "community_id": "C004",
+    "price": 4600,
+    "rooms": 2,
+    "area": 75,
+    "floor": 4,
+    "total_floors": 15,
+    "orientation": "南",
+    "gps": [116.3402, 40.0728],
+    "agent_id": "AGT003",
+    "description": "两居室，视频实拍，看房方便。",
+    "images": [
+      {"path": "images/video_fraud_10/1.jpg", "mock": {"authenticity": 0.9, "phash": "8e9f001122334455", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}}
+    ],
+    "videos": [
+      {"path": "videos/video_fraud_10/1.mp4", "mock": {"keyframe_authenticity": 0.1, "detected_rooms": 2, "asr_text": "有意者加微信 vx88888 详聊，价格好说", "asr_risk": "联系方式"}},
+      {"path": "videos/video_fraud_10/2.mp4", "mock": {"keyframe_authenticity": 0.15, "detected_rooms": 2, "asr_text": "", "asr_risk": ""}}
+    ]
+  }
+}

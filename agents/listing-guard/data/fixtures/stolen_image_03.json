@@ -1,0 +1,27 @@
+{
+  "case_id": "stolen_image_03",
+  "expected": "reject",
+  "note": "盗图：pHash 与既有房源库命中，触发否决项直接驳回",
+  "gov_status": "passed",
+  "human_decision": {"action": "approve", "comment": "-"},
+  "supplement": null,
+  "listing": {
+    "title": "丽都一品 精装两居 拎包入住",
+    "city": "北京",
+    "community": "丽都一品",
+    "community_id": "C002",
+    "price": 8500,
+    "rooms": 2,
+    "area": 92,
+    "floor": 9,
+    "total_floors": 24,
+    "orientation": "南北",
+    "gps": [116.4752, 39.9701],
+    "agent_id": "AGT003",
+    "description": "精装两居室，家具新，看房方便。",
+    "images": [
+      {"path": "images/stolen_image_03/1.jpg", "mock": {"authenticity": 0.15, "phash": "f60708a1b2c3d4e5", "is_duplicate": true, "duplicate_of": "LST-2025-118762", "detected_rooms": 2, "ocr_text": ""}},
+      {"path": "images/stolen_image_03/2.jpg", "mock": {"authenticity": 0.9, "phash": "07a1b2c3d4e5f608", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}}
+    ]
+  }
+}

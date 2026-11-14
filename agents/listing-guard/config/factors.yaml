@@ -1,0 +1,77 @@
+# 因子注册表：验真因子、权重与否决属性（v2 —— 五子图架构）
+# kind: deterministic = 规则引擎产出的确定性因子；probabilistic = 模型产出的概率性因子
+# veto: 否决项，命中后不参与加权平均，直接按 veto_style 走对应分支
+# veto_style: reject = 自动驳回；human = 强因子转人工
+# 来源：form_audit / image_vlm / video / text_risk / base_info 五个并行子图 + 政府核验算子
+factors:
+  # ---- 子图 1：表单规则核验 form_audit_subgraph ----
+  - id: form_rules
+    name: 表单规则自洽
+    kind: deterministic
+    weight: 0.08
+    veto: false
+
+  # ---- 子图 2：图片 VLM 核验 image_vlm_subgraph ----
+  - id: image_authenticity
+    name: 图片真实性（含盗图）
+    kind: probabilistic
+    weight: 0.25
+    veto: true
+    veto_style: reject
+
+  - id: image_text_consistency
+    name: 图文一致性（户型/房间数）
+    kind: probabilistic
+    weight: 0.12
+    veto: false
+
+  # ---- 子图 3：视频 ASR + 帧识别 video_subgraph ----
+  - id: video_authenticity
+    name: 视频真伪（关键帧+语音）
+    kind: probabilistic
+    weight: 0.15
+    veto: true
+    veto_style: reject
+
+  # ---- 子图 4：文本内容风控 text_risk_subgraph ----
+  - id: text_risk
+    name: 文本风控（违禁/飞单/违规承诺）
+    kind: probabilistic
+    weight: 0.10
+    veto: true
+    veto_style: reject
+
+  # ---- 子图 5：房源基本面校验 base_info_subgraph（楼盘库/历史房源库/信用库）----
+  - id: community_match
+    name: 楼盘库匹配
+    kind: deterministic
+    weight: 0.05
+    veto: false
+
+  - id: price_reasonable
+    name: 价格合理性（价格带偏离）
+    kind: deterministic
+    weight: 0.10
+    veto: true
+    veto_style: human   # 偏离 >40% 疑似钓鱼价：强因子转人工（误杀成本高于漏放）
+
+  - id: listing_duplicate
+    name: 重复房源（历史库）
+    kind: deterministic
+    weight: 0.05
+    veto: true
+    veto_style: human   # 疑似重复贴：转人工核实，不直接杀（可能同房东多平台发房）
+
+  - id: credit
+    name: 发房人行为与信用
+    kind: deterministic
+    weight: 0.10
+    veto: false
+
+  # ---- 政府核验（独立算子，与五子图并行）----
+  - id: gov_verify
+    name: 政府核验（住建/租赁监管）
+    kind: deterministic
+    weight: 0.20
+    veto: true
+    veto_style: human

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>李泽蛟 · 面试自我介绍</title>
+<style>
+  :root{
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --ink:#16233a;
+    --ink2:#3b4760;
+    --muted:#77839a;
+    --line:#e4e9f0;
+    --accent:#1f5fd0;
+    --accent-soft:#eaf1fd;
+    --red:#bf443a;
+    --red-soft:#fbefed;
+    --gold:#a9791f;
+    --gold-soft:#fbf4e6;
+    --teal:#1f7a70;
+    --teal-soft:#e8f4f2;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:15px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:34px 22px 70px}
+
+  /* ---------- header ---------- */
+  .hero{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-top:4px solid var(--accent);
+    border-radius:10px;
+    padding:30px 34px 26px;
+    box-shadow:0 2px 14px rgba(22,35,58,.045);
+  }
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+  h1{font-size:30px;letter-spacing:2px;margin:0 0 6px;font-weight:700}
+  .title-sub{color:var(--accent);font-size:14px;font-weight:600;letter-spacing:.6px;margin:0}
+  .badge{
+    display:inline-block;background:var(--accent-soft);color:var(--accent);
+    border:1px solid #d5e3fb;border-radius:20px;padding:4px 13px;
+    font-size:12.5px;font-weight:600;margin:0 6px 6px 0;white-space:nowrap;
+  }
+  .badges{text-align:right;max-width:330px}
+  .slogan{
+    margin:22px 0 18px;padding:16px 20px;
+    background:linear-gradient(90deg,var(--accent-soft),#f6f9ff);
+    border-left:3px solid var(--accent);border-radius:0 6px 6px 0;
+    font-size:17px;font-weight:600;line-height:1.8;color:var(--ink);
+  }
+  .contact{
+    display:flex;flex-wrap:wrap;gap:6px 22px;
+    border-top:1px dashed var(--line);padding-top:14px;
+    font-size:13px;color:var(--muted);
+  }
+  .contact b{color:var(--ink2);font-weight:600}
+
+  /* ---------- section ---------- */
+  section{margin-top:30px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;padding-left:12px;border-left:4px solid var(--accent)}
+  .sec-head h2{font-size:19px;margin:0;letter-spacing:1px}
+  .sec-head span{font-size:12.5px;color:var(--muted)}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:24px 28px;box-shadow:0 2px 12px rgba(22,35,58,.035);
+  }
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{
+    border:1px solid var(--line);background:var(--card);color:var(--ink2);
+    border-radius:7px;padding:9px 17px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:.18s;font-family:inherit;
+  }
+  .tab:hover{border-color:#b9cdf1;color:var(--accent)}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(31,95,208,.22)}
+  .tab small{font-weight:400;opacity:.8;font-size:12px;margin-left:5px}
+  .toolbar{display:flex;gap:8px;margin-left:auto}
+  .btn{
+    border:1px solid var(--line);background:var(--card);color:var(--ink2);
+    border-radius:7px;padding:8px 14px;font-size:13px;cursor:pointer;
+    font-family:inherit;transition:.18s;
+  }
+  .btn:hover{border-color:#b9cdf1;color:var(--accent);background:#fafcff}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:#174fb3;color:#fff}
+
+  .pane{display:none}
+  .pane.active{display:block}
+  .pane-note{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    font-size:13px;color:var(--muted);border-bottom:1px dashed var(--line);
+    padding-bottom:12px;margin-bottom:20px;
+  }
+  .pane-note strong{color:var(--red)}
+
+  .seg{margin-bottom:22px;break-inside:avoid}
+  .seg:last-child{margin-bottom:4px}
+  .seg-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .seg-no{
+    width:25px;height:25px;flex:0 0 25px;border-radius:50%;
+    background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12.5px;font-weight:700;
+  }
+  .seg-title{font-size:15.5px;font-weight:700;color:var(--ink)}
+  .seg-time{
+    margin-left:auto;font-size:12px;color:var(--muted);
+    background:#f5f7fa;border:1px solid var(--line);border-radius:4px;padding:2px 9px;
+  }
+  .script{
+    font-size:16px;line-height:2.05;color:var(--ink2);
+    letter-spacing:.2px;padding-left:35px;
+  }
+  .script p{margin:0 0 10px}
+  .hl{background:linear-gradient(transparent 62%,#ffe9a8 62%);font-weight:600;color:var(--ink);padding:0 1px}
+  .num{color:var(--red);font-weight:700}
+  .en{color:var(--accent);font-weight:600}
+  .pause{
+    display:inline-block;font-size:11.5px;color:var(--muted);
+    border:1px dashed #cfd8e5;border-radius:4px;padding:0 7px;margin:0 4px;
+    vertical-align:2px;background:#fbfcfe;font-weight:400;letter-spacing:0;
+  }
+  .subline{
+    padding-left:35px;margin-top:9px;font-size:13.5px;color:var(--muted);
+    border-left:2px solid var(--line);padding-bottom:2px;padding-top:2px;
+  }
+
+  /* ---------- data cards ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .stat{
+    background:var(--card);border:1px solid var(--line);border-radius:9px;
+    padding:17px 18px;border-top:3px solid var(--red);
+  }
+  .stat .v{font-size:23px;font-weight:800;color:var(--red);line-height:1.3;letter-spacing:.5px}
+  .stat .k{font-size:13px;color:var(--ink2);font-weight:600;margin-top:5px}
+  .stat .d{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.6}
+  .stat.blue{border-top-color:var(--accent)} .stat.blue .v{color:var(--accent)}
+  .stat.teal{border-top-color:var(--teal)} .stat.teal .v{color:var(--teal)}
+  .stat.gold{border-top-color:var(--gold)} .stat.gold .v{color:var(--gold)}
+
+  /* ---------- timeline ---------- */
+  .tl{list-style:none;margin:0;padding:0 0 0 22px;border-left:2px solid #dce5f3}
+  .tl li{position:relative;margin-bottom:16px}
+  .tl li:last-child{margin-bottom:0}
+  .tl li::before{
+    content:"";position:absolute;left:-29px;top:7px;width:11px;height:11px;
+    border-radius:50%;background:#fff;border:3px solid var(--accent);
+  }
+  .tl .yr{font-size:12.5px;color:var(--accent);font-weight:700;letter-spacing:.5px}
+  .tl .co{font-size:15px;font-weight:700;margin:1px 0 2px}
+  .tl .desc{font-size:13.5px;color:var(--muted);line-height:1.7}
+
+  /* ---------- QA ---------- */
+  .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .qa{
+    background:var(--card);border:1px solid var(--line);border-radius:9px;
+    padding:16px 18px;border-left:3px solid var(--teal);
+  }
+  .qa .q{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:7px;line-height:1.6}
+  .qa .a{font-size:13.2px;color:var(--ink2);line-height:1.85}
+  .qa .a b{color:var(--teal)}
+  .qa.pay{border-left-color:var(--gold)}
+  .qa.pay .a b{color:var(--gold)}
+
+  /* ---------- tips ---------- */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .tip-list{margin:0;padding-left:19px}
+  .tip-list li{margin-bottom:9px;font-size:13.8px;color:var(--ink2);line-height:1.8}
+  .tip-list li:last-child{margin-bottom:0}
+  .tip-list b{color:var(--ink)}
+  .fit{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .fit-item{
+    background:#f8fafd;border:1px solid var(--line);border-radius:8px;padding:15px 16px;
+  }
+  .fit-item h4{margin:0 0 7px;font-size:14px;color:var(--accent)}
+  .fit-item p{margin:0;font-size:13px;color:var(--ink2);line-height:1.8}
+
+  footer{
+    margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    font-size:12.5px;color:var(--muted);
+  }
+
+  /* ---------- print ---------- */
+  @page{size:A4;margin:16mm 14mm}
+  @media print{
+    body{background:#fff;font-size:12.5px}
+    .wrap{max-width:none;padding:0}
+    .hero,.card,.stat,.qa,.fit-item{box-shadow:none}
+    .tabs,.toolbar,.btn{display:none !important}
+    .pane:not(.active){display:none !important}
+    .pane.active{display:block !important}
+    section{margin-top:18px;break-inside:avoid}
+    .script{font-size:13.5px;line-height:1.85}
+    .stat,.qa,.fit-item,.seg,.tl li{break-inside:avoid}
+    .hl{background:#fff3cc !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .seg-no,.badge,.stat,.qa,.fit-item,.slogan{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+  @media (max-width:720px){
+    .wrap{padding:18px 12px 40px}
+    .hero{padding:22px 20px}
+    .card{padding:20px 18px}
+    .badges{text-align:left;max-width:none}
+    .stats,.qa-grid,.two,.fit{grid-template-columns:1fr}
+    .script{padding-left:0;font-size:15.5px;line-height:1.95}
+    .subline{padding-left:12px}
+    .toolbar{margin-left:0;width:100%;margin-top:6px}
+    h1{font-size:25px}
+    .slogan{font-size:15.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <h1>李泽蛟</h1>
+        <p class="title-sub">面试自我介绍 · AI 应用研发 / AI Agent 工程师 / AI 全栈开发</p>
+      </div>
+      <div class="badges">
+        <span class="badge">12 年研发经验</span>
+        <span class="badge">AI Agent / RAG / MCP</span>
+        <span class="badge">交易 · 支付 · 资金一致性</span>
+        <span class="badge">现居北京朝阳</span>
+      </div>
+    </div>
+    <div class="slogan">
+      一句话定位：不是半路转 AI 的工程师，而是把 8 年复杂交易与资金系统的可靠性功底，迁移到 AI Agent 规模化落地的工程老兵 —— 既能搭底座，也能拿到业务结果。
+    </div>
+    <div class="contact">
+      <span><b>电话</b> 17611028882</span>
+      <span><b>邮箱</b> 8346132@qq.com</span>
+      <span><b>博客</b> lizejiao.github.io</span>
+      <span><b>公众号</b> 狗蛋的智栈</span>
+      <span><b>学历</b> 沈阳化工大学 · 电子科学与技术 · 统招本科</span>
+    </div>
+  </div>
+
+  <!-- ============ SCRIPT ============ -->
+  <section>
+    <div class="sec-head"><h2>口述讲稿</h2><span>可直接照念 · 按面试开场时长选择版本</span></div>
+
+    <div class="tabs">
+      <button class="tab active" data-pane="p1">60 秒精简版<small>≈ 260 字</small></button>
+      <button class="tab" data-pane="p2">3 分钟标准版<small>≈ 850 字 · 推荐</small></button>
+      <button class="tab" data-pane="p3">开场钩子 &amp; 收尾<small>按需替换</small></button>
+      <div class="toolbar">
+        <button class="btn" id="copyBtn">复制当前讲稿</button>
+        <button class="btn primary" id="printBtn">打印 / 存 PDF</button>
+      </div>
+    </div>
+
+    <!-- 60s -->
+    <div class="card pane active" id="p1">
+      <div class="pane-note">
+        <span>适用：<strong>「请先简单介绍一下自己」</strong>、群面、时间被压缩的开场</span>
+        <span>目标：只立一条主线 + 三个记忆点，把细节留作追问弹药</span>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">1</span><span class="seg-title">定调</span><span class="seg-time">约 10 秒</span></div>
+        <div class="script"><p>面试官好，我是李泽蛟，<span class="num">12 年</span>后端研发，求职方向是 AI 应用研发 / AI Agent 工程师。我的经历可以概括成一句话：<span class="hl">前 8 年做交易、支付和资金一致性，近 3 年在 58 同城把 AI Agent 做成了生产系统和团队标准工作流</span>。<span class="pause">停顿</span></p></div>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">2</span><span class="seg-title">底座（一句带过，不展开公司名）</span><span class="seg-time">约 18 秒</span></div>
+        <div class="script"><p>前 8 年在包银消费金融和龙湖集团，负责核心交易、支付系统、财务核算与积分电商，对接银联、网联和多家银行做智能支付路由、代付放款和<span class="num">多级对账</span>，系统支撑每分钟 640 笔以上授信、日终 152 万笔借据处理。这段经历让我对幂等、状态机、补偿、对账这些可靠性设计形成了本能。</p></div>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">3</span><span class="seg-title">AI 三件事（本段是记忆点）</span><span class="seg-time">约 25 秒</span></div>
+        <div class="script"><p>2021 年底加入 58 租房，近两年聚焦三件事：一是自研 <span class="en">AI 自动化「开发·运行·测试」平台</span>，把单接口迭代从半天压到分钟级，已推广为团队标准工作流；二是基于 <span class="en">LangGraph</span> 落地发房自动审核 Agent，多模态验真加置信度分档，自动审核覆盖率 <span class="num">80% 以上</span>；三是提出<span class="hl">「代码仓库 md 即知识库」</span>，文档随代码版本化、CI 增量更新，人工咨询量下降约 <span class="num">80%</span>。</p></div>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">4</span><span class="seg-title">结果 + 收口</span><span class="seg-time">约 12 秒</span></div>
+        <div class="script"><p>业务侧也拿到了可量化结果：AI 首图优选带动点击转化率提升 <span class="num">2.87%</span>，金牌经纪人展位转化率提升 <span class="num">46%</span>。所以我既能搭 Agent、RAG、MCP 的工程底座，也能在真实业务里拿到收益。希望加入能把 AI 应用规模化落地的团队，谢谢。</p></div>
+      </div>
+      <div class="subline">念法提示：数字只重读 2～3 个（80%、46%、分钟级），其余快速带过；每段结尾留半秒停顿，让面试官有机会接话。</div>
+    </div>
+
+    <!-- 3min -->
+    <div class="card pane" id="p2">
+      <div class="pane-note">
+        <span>适用：<strong>常规单面开场</strong>，最常用版本</span>
+        <span>结构：定调 → 底座 → AI 转型 → 业务结果 → 动机收口</span>
+      </div>
+
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">1</span><span class="seg-title">开场定调：先给主线，不要流水账</span><span class="seg-time">约 20 秒</span></div>
+        <div class="script"><p>面试官好，我是李泽蛟，2013 年毕业于沈阳化工大学电子科学与技术专业，到现在 <span class="num">12 年</span>后端研发经验，目前求职方向是 AI 应用研发 / AI Agent 工程师。<span class="pause">停顿</span></p>
+        <p>如果用一个框架介绍我自己：<span class="hl">前 8 年我在做「不能出错」的系统——交易、支付、资金一致性；近 3 年我在做「怎么让 AI 把事真正干完」——Agent、RAG 和研发效能工程</span>。这两段不是割裂的，后者其实很吃前者的功底：AI 要进生产，最难的不是模型，而是可靠性、可解释性和出错之后怎么办。</p></div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">2</span><span class="seg-title">第一阶段：交易与支付底座</span><span class="seg-time">约 40 秒</span></div>
+        <div class="script"><p>职业前半段主要在两家：包银消费金融做了 4 年，负责核心交易、支付系统和财务核算。支付系统是信贷核心的资金执行层，我对接银联、网联以及多家银行和第三方支付机构，做了<span class="en">智能支付路由</span>——按渠道成本、实时成功率、限额、卡种和维护窗口多维打分自动选路，异常通道自动降级熔断；还有代付放款、代扣批扣、差错挂账和渠道 / 资金 / 账务多级对账，全链路靠幂等、状态机和「本地事务 + 可靠消息 + 定时补偿」保证最终一致。峰值支撑每分钟 640 笔以上授信、日终 152 万笔借据处理，交易侧零资损。</p>
+        <p>之后在龙湖集团参与珑珠积分电商的架构与交易链路，做订单状态机、库存防超卖和大促削峰。<span class="hl">这 8 年留给我的不只是技术栈，更是两个习惯：资金零资损的边界意识，以及「任何写操作都要想清楚怎么对账、怎么补偿」的默认动作</span>。</p></div>
+        <div class="subline">若面试官是业务型团队，可在这里补一句：也做过清结算工作台和 1104 / EAST 监管报送，对合规口径不陌生。</div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">3</span><span class="seg-title">第二阶段：58 同城业务盘子（快速带过）</span><span class="seg-time">约 25 秒</span></div>
+        <div class="script"><p>2021 年底加入 58 同城租房业务线，负责 58 / 安居客四端的房源列表、详情与个性化推荐，B 端发房与房源验真、政府核验，以及省心租「订单 → 支付 → 履约 → 退款 → 结算」服务交易闭环，还有房金融的赎楼账本核算——放款、还款计划、按日计息与罚息、按「罚息 → 费用 → 利息 → 本金」优先级自动冲账。<span class="hl">这段让我既懂 C 端体验，也懂 B 端和商业化的收入链路</span>。</p></div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">4</span><span class="seg-title">第三阶段：AI 工程化三件事（重点，语速放慢）</span><span class="seg-time">约 75 秒</span></div>
+        <div class="script"><p>近两三年我把重心转向 AI，做的不是几个零散工具，而是三件能进生产的事。</p>
+        <p><strong>第一件，AI 自动化「开发·运行·测试」平台。</strong>参考 Harness Engineering 的思路：<span class="hl">AI 编码的瓶颈不是模型不够强，而是环境规格不足</span>——缺工具、缺上下文、缺反馈、缺「做完了」的判断标准。所以我用 <span class="en">AGENTS.md</span> 加分层结构化文档做上下文治理，用新鲜度 linter 防止文档腐烂；自研 MCP 服务打通内网沙箱、线上日志和登录态，凭证由使用者本人保管、Agent 只读存在性；再用 linter 机械强制分层架构，报错信息里直接内嵌修复指令。最终打通「AI 编码 → 自动测试 → 自动部署 → 自动验证 → 日志排障」闭环，<span class="num">单接口迭代周期从半天级压缩到分钟级</span>，现在已是团队标准研发工作流，研发者的角色从写代码上移为定需求、定验收、验结果。</p>
+        <p><strong>第二件，房源发房自动审核 Agent。</strong>基于 <span class="en">LangGraph</span> 状态机编排：图像、OCR、规则引擎、政府核验并行扇出后加权汇聚，条件边按置信度分档路由，检查点持久化让政府核验的异步回调可以断点复跑，图像和语音封装成子图做上下文隔离。工程上有三个我比较在意的点：<span class="hl">房源描述是用户可控输入，要防提示词注入</span>，所以把输入严格限制在数据区、做分隔符隔离，模型只输出 JSON Schema 约束的结构化判定，不允许自由文本影响路由；<span class="hl">误杀成本远高于漏放</span>，所以用非对称阈值，中间地带一律转人工；策略权重和阈值全部配置化，运营不用发版就能调。上线后自动审核覆盖率 <span class="num">80% 以上</span>，优质房源分钟级上架。</p>
+        <p><strong>第三件，运营客服知识库。</strong>传统知识库最大的毛病是知识滞后——需求每周迭代，文档停在上线那天。我提出<span class="hl">「代码仓库 md 即知识库」</span>：需求文档、接口说明、枚举字典、FAQ 随代码一起提交、Review、版本化，CI 触发增量更新，文档过期等同代码缺陷、在 CI 阶段拦截。检索侧按 Markdown 标题层级做语义切片、保留标题路径，向量加 ES 双路混合召回再重排，答案标注来源文件与行号可一键跳回源文档，避免模型自信编造。上线后<span class="num">人工咨询量下降约 80%</span>，几乎看不到转研发的工单。</p></div>
+        <div class="subline">这一段是每个项目都留了「钩子」：环境规格、防注入、非对称阈值、知识滞后——面试官大概率顺着其中一个追问，详见下方「追问准备」。</div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">5</span><span class="seg-title">业务结果：证明不是技术演示</span><span class="seg-time">约 25 秒</span></div>
+        <div class="script"><p>我比较在意 AI 的业务产出，而不只是技术跑通。在试点城市上线房源首图智能优选，点击量提升 0.67%、<span class="num">点击转化率提升 2.87%</span>、链接曝光占比提升 3.56%；在场景卡片里新增 AI 金牌经纪人智能展位，对比旧版本<span class="num">展位转化率提升 46%</span>，全直销城市每天新增约 <span class="num">200 条商机线索</span>。技术侧和业务侧的结果是能对上的：一边是效率，一边是收入。</p></div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">6</span><span class="seg-title">收口：把话头交回面试官</span><span class="seg-time">约 15 秒</span></div>
+        <div class="script"><p>所以我的定位是：<span class="hl">既能把 Agent、RAG、MCP、Harness 这套工程底座搭起来，也有复杂交易和资金系统兜底的可靠性意识，还能在真实业务里拿到可量化的结果</span>。这次想找一个能把 AI 应用从 0 到 1 做到规模化落地的岗位。我平时写技术博客和公众号「狗蛋的智栈」，也习惯把踩过的坑沉淀成团队规范。<span class="pause">停顿</span>以上是我的基本情况，您看想先从哪块展开？</p></div>
+        <div class="subline">最后一句主动交还话头，比「谢谢」更好用；同时把你准备最充分的项目摆到台面上。</div>
+      </div>
+    </div>
+
+    <!-- hooks -->
+    <div class="card pane" id="p3">
+      <div class="pane-note">
+        <span>用途：按公司类型替换开场与收尾，讲稿主体不变</span>
+        <span>建议：只改第 1 段和最后 1 段，中间不要动</span>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">A</span><span class="seg-title">开场钩子 · 四选一</span></div>
+        <div class="script">
+          <p><strong>① 通用稳妥：</strong>「面试官好，我是李泽蛟，12 年后端研发，近 3 年专注 AI Agent 工程化落地。我想用一条主线介绍自己：前 8 年做不能出错的交易与支付系统，近 3 年把这套可靠性要求带进 AI 落地。」</p>
+          <p><strong>② 面向 AI 创业公司 / 小团队：</strong>「我比较适合从 0 到 1 的活：在 58 我一个人把 Agent 平台从概念做到团队标准工作流，从上下文治理、MCP 工具、质量门禁到上线效果都是自己闭环的，Java、Python、前端也都能自己写。」</p>
+          <p><strong>③ 面向大厂平台型团队：</strong>「我的经验偏『把 AI 变成工程系统』：状态机编排、上下文治理、可观测、灰度放量与评估闭环，而不是单点调 prompt；在 58 租房这种四端、多城市、有监管核验要求的业务里做过规模化验证。」</p>
+          <p><strong>④ 面向业务 / 增长型团队：</strong>「我做 AI 有个习惯，先问指标是什么。首图优选让点击转化率提升 2.87%，经纪人智能展位转化率提升 46%、每天多约 200 条商机，客服知识库让人工咨询量降了约 80%——我更愿意对结果负责，而不只是交付一个模型接口。」</p>
+        </div>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">B</span><span class="seg-title">收尾 · 三选一</span></div>
+        <div class="script">
+          <p><strong>① 交还话头：</strong>「以上是我的基本情况，您看想先从哪块展开？」<span class="pause">推荐</span></p>
+          <p><strong>② 对齐岗位：</strong>「我看岗位描述里提到 Agent 平台和可观测，这块我刚好完整做过一轮，一会儿可以详细聊聊。」</p>
+          <p><strong>③ 表达意愿：</strong>「我这次比较明确，就想继续做 AI 应用的工程化落地，尤其希望是能进生产、有真实业务指标的那种场景。」</p>
+        </div>
+      </div>
+      <div class="seg">
+        <div class="seg-head"><span class="seg-no">C</span><span class="seg-title">三个不要</span></div>
+        <div class="script"><p>不要按时间顺序把 5 家公司逐一报一遍；不要一上来就堆 LangGraph / MCP / RAG 名词（首次出现补一句人话，例如「LangGraph，也就是带状态机的工作流编排」）；不要在开场把 10 个数字全念完——数字是追问时的弹药，不是开场的目的。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section>
+    <div class="sec-head"><h2>关键数字</h2><span>讲稿里只念 2～3 个，其余留给追问</span></div>
+    <div class="stats">
+      <div class="stat"><div class="v">半天 → 分钟级</div><div class="k">单接口迭代周期</div><div class="d">AI 自动化开发·运行·测试平台，已推广为团队标准工作流</div></div>
+      <div class="stat blue"><div class="v">80%+</div><div class="k">发房自动审核覆盖率</div><div class="d">LangGraph 多模态验真 Agent，不到 20% 转人工</div></div>
+      <div class="stat teal"><div class="v">↓ 约 80%</div><div class="k">人工咨询量</div><div class="d">「代码仓库 md 即知识库」RAG + 引用溯源</div></div>
+      <div class="stat gold"><div class="v">+46%</div><div class="k">经纪人展位转化率</div><div class="d">全直销城市每日新增约 200 条商机线索</div></div>
+      <div class="stat"><div class="v">+2.87%</div><div class="k">房源点击转化率</div><div class="d">AI 首图智能优选；链接曝光占比 +3.56%</div></div>
+      <div class="stat blue"><div class="v">152 万笔 / 日</div><div class="k">日终借据处理量</div><div class="d">持牌消金核心交易：640+ 笔/分钟授信，17 万客户/小时贷后批处理</div></div>
+    </div>
+  </section>
+
+  <!-- ============ TIMELINE ============ -->
+  <section>
+    <div class="sec-head"><h2>经历主线</h2><span>开口讲的时候只讲「两段」，不逐条念</span></div>
+    <div class="card">
+      <ul class="tl">
+        <li><div class="yr">2021.12 – 2026.10 · 近 5 年</div><div class="co">58 同城 · 租房业务线 | AI 应用研发 / 全栈后端</div><div class="desc">四端找房与 B 端发房、省心租服务交易、房金融账本核算；近 3 年主导 AI 平台、发房审核 Agent、客服知识库与 AI 商业化。Java · Python · PHP。</div></li>
+        <li><div class="yr">2021.04 – 2021.11</div><div class="co">龙湖集团 | Java 后端 / 平台中台研发</div><div class="desc">珑珠积分电商交易链路、统一消息推送网关（极光 + 短信双通道）。</div></li>
+        <li><div class="yr">2017.05 – 2021.04 · 4 年</div><div class="co">包银消费金融（现蒙商消费）| 核心交易 / 支付 / 财务核算</div><div class="desc">智能支付路由、多通道银行对接、代付放款与代扣批扣、差错挂账与多级对账、清结算与监管报送。</div></li>
+        <li><div class="yr">2013.07 – 2017.04</div><div class="co">大连灵动科技 / 大连安吉尼尔 | Java 后端开发</div><div class="desc">职业起步，打下 Java 后端与工程规范基础。</div></li>
+        <li><div class="yr">2009.09 – 2013.07</div><div class="co">沈阳化工大学 · 电子科学与技术 · 全日制统招本科</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ QA ============ -->
+  <section>
+    <div class="sec-head"><h2>追问准备</h2><span>讲稿里埋的钩子，面试官大概率会顺着问</span></div>
+    <div class="qa-grid">
+      <div class="qa"><div class="q">Q1 · 为什么用 LangGraph，而不是线性流水线或低代码平台？</div><div class="a">真实业务有<b>异步外部回调</b>（政府核验分钟到小时级）和<b>人工审批挂起</b>，需要状态机 + <b>检查点持久化</b>做断点复跑；置信度分档要走<b>条件边</b>而非固定顺序；多算子<b>并行扇出</b>避免串行累加耗时；图像、语音封装<b>子图</b>做上下文隔离，只回传结构化结论。</div></div>
+      <div class="qa"><div class="q">Q2 · Agent 怎么防提示词注入？</div><div class="a">房源描述、图片 OCR 都是<b>用户可控输入</b>。做法：严格限制在<b>数据区</b> + 分隔符隔离 + 指令剥离；模型只输出 <b>JSON Schema</b> 约束的结构化判定，<b>不允许自由文本影响路由</b>；命中注入特征直接转人工。</div></div>
+      <div class="qa"><div class="q">Q3 · 自动审核误杀了优质房源怎么办？</div><div class="a"><b>误杀成本高于漏放</b>（房东流失不可逆）→ <b>非对称阈值</b>：放行阈值高、拦截阈值低，中间地带一律转人工而非自动驳回；按城市 / 类目灰度，人工复审结果持续回调阈值；因子权重与阈值<b>配置化</b>，运营自助调整不用发版。另外不做端到端大模型拍板，规则出确定性因子、模型出概率性因子，汇聚后输出命中因子清单，保证<b>可解释、可申诉</b>。</div></div>
+      <div class="qa"><div class="q">Q4 · Harness Engineering 到底解决什么问题？</div><div class="a">瓶颈是<b>环境规格不足</b>，不是模型能力：缺工具、缺上下文、缺反馈、缺「做完了」的标准。四层解法：<b>AGENTS.md 地图式文档</b> + 新鲜度 linter 与后台巡检 Agent；<b>MCP 打通内网</b>沙箱 / 日志 / 登录态（凭证本人保管、全量审计、高频日志拆 CLI 省 Token）；<b>自愈式 linter</b> 把修复指令写进报错 + 单向分层约束 + 测试红了拒绝 push；<b>长任务进度文件 + git 历史</b>交接，避免上下文耗尽后过早宣布完工或未验证就标记完成。</div></div>
+      <div class="qa"><div class="q">Q5 · 「代码仓库 md 即知识库」为什么能治知识滞后？</div><div class="a">文档<b>随代码提交、Review、版本化</b>，上新需求即知识库生效；CI 监听 docs/、CHANGELOG、接口定义、枚举、FAQ 触发<b>增量更新</b>；文档过期等同代码缺陷，由新鲜度 linter 在 CI 拦截。检索侧按 Markdown 标题层级<b>语义切片</b>并保留标题路径，向量 + ES <b>混合召回 + 重排</b>，答案<b>引用溯源到文件行号</b>可一键跳回；知识库还是客服 Agent 的上下文层，配合工具调用直接查订单、房源、审核状态，从「告诉你怎么做」变成「帮你把事办了」。</div></div>
+      <div class="qa"><div class="q">Q6 · AI 项目怎么衡量价值，不只是 demo？</div><div class="a">分两类：<b>效率</b>——单接口迭代半天→分钟级、修复类需求 100% 沉淀回归用例、自动审核 80%+、人工咨询量降约 80%；<b>增长</b>——点击转化率 +2.87%、展位转化率 +46%、全直销城市日增约 200 条商机、链接曝光占比 +3.56%。</div></div>
+      <div class="qa pay"><div class="q">Q7 · 资金一致性 / 零资损具体怎么做？</div><div class="a">全链路<b>幂等</b>（支付流水号 + 业务单号双重去重）、<b>状态机</b>驱动流转；跨系统「本地事务 + 可靠消息 + 定时补偿」保最终一致；<b>差错池与挂账</b>处理退票、重复扣款、长短款、超时未明；渠道 / 资金 / 账务<b>多级对账</b>逐笔勾兑、差异自动告警挂账；退款原路返回 + 幂等状态机杜绝重复退款；按「罚息 → 费用 → 利息 → 本金」优先级自动冲账。</div></div>
+      <div class="qa pay"><div class="q">Q8 · 为什么从支付 / 交易转做 AI？</div><div class="a">不算转行，是<b>把复杂业务的工程要求带进 AI 落地</b>：资金系统里练出来的幂等、可解释、可追溯、高风险转人工，恰好就是 Agent 进生产最缺的东西（置信度分层、人机协同、引用溯源、灰度回滚都是同一套思维）。同时我做了十几年真实业务，知道指标在哪、谁能买单，不会只交付一个能跑的 demo。</div></div>
+    </div>
+  </section>
+
+  <!-- ============ DELIVERY ============ -->
+  <section>
+    <div class="sec-head"><h2>表达提示</h2><span>内容与讲法同样重要</span></div>
+    <div class="two">
+      <div class="card">
+        <ul class="tip-list">
+          <li><b>前 15 秒定调。</b>先抛出「8 年交易 + 3 年 AI」这条主线，后面所有内容都挂在这条线上，面试官才记得住。</li>
+          <li><b>语速 220～260 字/分钟。</b>3 分钟版约 850 字，讲到第 4 段（AI 三件事）主动放慢，那是区分度所在。</li>
+          <li><b>技术名词首次出现补一句人话。</b>「LangGraph，也就是带状态机的工作流编排」「MCP，让 AI 能安全调用内网工具」。</li>
+          <li><b>每段结尾留钩子。</b>「环境规格不足」「防提示词注入」「误杀成本高于漏放」「知识滞后」——把追问引到准备最充分的地方。</li>
+          <li><b>数字慢读、少读。</b>开场最多 3 个；被追问时再展开完整口径与试点范围，显得数据可信。</li>
+          <li><b>结尾主动收口。</b>用「您看想先从哪块展开？」交还话头，不要以「我说完了」或长串致谢拖尾。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--ink)">按岗位调整侧重</div>
+        <div class="fit" style="grid-template-columns:1fr;gap:10px">
+          <div class="fit-item"><h4>AI 应用研发</h4><p>重心放在「从 0 到 1 端到端落地 + 可量化业务结果」：首图优选、经纪人展位、客服知识库，强调自己能对指标负责，不只是接模型 API。</p></div>
+          <div class="fit-item"><h4>AI Agent 工程师</h4><p>重心放在编排与工程底座：LangGraph 状态机 / 检查点 / 子图隔离、上下文治理、MCP、结构化输出与防注入、置信度分层的人机协同、Harness 质量门禁。</p></div>
+          <div class="fit-item"><h4>AI 全栈开发</h4><p>重心放在交付宽度：精通 Java、熟练 Python / PHP / JS，懂 HTML/CSS 与浏览器插件，四端业务 + 微服务、可观测、CI 全链路，一个需求能从底座做到上线。</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>李泽蛟 · 面试自我介绍 · 依据个人简历整理，所有数据均来自简历原文</span>
+    <span>建议打印为 A4 提词卡，或复制讲稿到备忘录</span>
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var tabs = document.querySelectorAll('.tab');
+    var panes = document.querySelectorAll('.pane');
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tabs.forEach(function(x){ x.classList.remove('active'); });
+        panes.forEach(function(p){ p.classList.remove('active'); });
+        t.classList.add('active');
+        var target = document.getElementById(t.dataset.pane);
+        if(target) target.classList.add('active');
+      });
+    });
+
+    document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+
+    document.getElementById('copyBtn').addEventListener('click', function(){
+      var active = document.querySelector('.pane.active');
+      var btn = this;
+      if(!active) return;
+      var lines = active.querySelectorAll('.script p');
+      var text = Array.prototype.map.call(lines, function(p){ return p.innerText.trim(); }).join('\n\n');
+      var done = function(){ btn.textContent = '已复制 ✓'; setTimeout(function(){ btn.textContent = '复制当前讲稿'; }, 1800); };
+      if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){ btn.textContent = '复制失败，请手动选择'; }
+        document.body.removeChild(ta);
+      }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest_tmp/
+
+# 运行期产物（检查点库 / 待回调队列 / 人工裁决回流样本 / 指标）
+data/checkpoints.sqlite*
+data/gov_pending.json
+data/feedback/*
+!data/feedback/.gitkeep
+data/metrics.jsonl
+data/published.jsonl

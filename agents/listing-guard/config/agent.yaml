@@ -1,0 +1,15 @@
+# 图编排与工程参数（改这里不发版）
+agent:
+  # 检查点库：断点续跑的进度载体（SQLite 单文件，生产换 PostgresSaver）
+  checkpoint_db: data/checkpoints.sqlite
+  # 政府核验待回调队列（mock 用本地 JSON 模拟消息队列）
+  gov_pending_file: data/gov_pending.json
+  # 人工裁决回流目录（策略迭代样本）
+  feedback_dir: data/feedback
+  # 算子超时（毫秒）：超时降级为 degraded 因子，不阻断整体
+  tool_timeout_ms: 5000
+
+gray_release:
+  # 灰度放量：未命中灰度的城市直接走人工，不进自动链路
+  cities: ["北京"]
+  ratio: 1.0

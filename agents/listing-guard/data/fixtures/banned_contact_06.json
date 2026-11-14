@@ -1,0 +1,27 @@
+{
+  "case_id": "banned_contact_06",
+  "expected": "reject",
+  "note": "合规红线：OCR 与描述中出现联系方式/飞单引导，否决项直接驳回",
+  "gov_status": "passed",
+  "human_decision": {"action": "approve", "comment": "-"},
+  "supplement": null,
+  "listing": {
+    "title": "天通苑北一区 低价包过 两居直租",
+    "city": "北京",
+    "community": "天通苑北一区",
+    "community_id": "C003",
+    "price": 4200,
+    "rooms": 2,
+    "area": 80,
+    "floor": 8,
+    "total_floors": 18,
+    "orientation": "南",
+    "gps": [116.4183, 40.0759],
+    "agent_id": "AGT003",
+    "description": "两居室直租，看房电话 13812345678，随时联系。",
+    "images": [
+      {"path": "images/banned_contact_06/1.jpg", "mock": {"authenticity": 0.9, "phash": "2b3c4d5e6f70801a", "is_duplicate": false, "detected_rooms": 2, "ocr_text": "看房加微信 abc12345 扫码联系"}},
+      {"path": "images/banned_contact_06/2.jpg", "mock": {"authenticity": 0.88, "phash": "3c4d5e6f70801a2b", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}}
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "case_id": "low_confidence_08",
+  "expected": "review",
+  "note": "低置信样本：多因子中度可疑，落非对称阈值中间地带，AI 出评判意见转人工",
+  "gov_status": "passed",
+  "human_decision": {"action": "approve", "comment": "实地核验通过"},
+  "supplement": null,
+  "listing": {
+    "title": "丽都一品 大平层五居 景观房",
+    "city": "北京",
+    "community": "丽都一品",
+    "community_id": "C002",
+    "price": 16000,
+    "rooms": 5,
+    "area": 150,
+    "floor": 18,
+    "total_floors": 24,
+    "orientation": "南北",
+    "gps": [116.4751, 39.9698],
+    "agent_id": "AGT002",
+    "description": "大平层，景观好，价格可谈，长租优惠。",
+    "images": [
+      {"path": "images/low_confidence_08/1.jpg", "mock": {"authenticity": 0.4, "phash": "6f70801a2b3c4d5e", "is_duplicate": false, "detected_rooms": 3, "ocr_text": ""}},
+      {"path": "images/low_confidence_08/2.jpg", "mock": {"authenticity": 0.4, "phash": "70801a2b3c4d5e6f", "is_duplicate": false, "detected_rooms": 3, "ocr_text": ""}}
+    ]
+  }
+}

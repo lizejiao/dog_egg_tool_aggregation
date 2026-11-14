@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 运行时数据（含 apiKey 的 config.json、SQLite、音频工件，一律不入库）
+backend/data/
+
+# 系统
+.DS_Store
+local_engines/

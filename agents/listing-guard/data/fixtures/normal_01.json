@@ -1,0 +1,72 @@
+{
+  "case_id": "normal_01",
+  "expected": "pass",
+  "note": "标准优质房源（带实拍视频）：全因子健康，分钟级自动上架",
+  "gov_status": "passed",
+  "human_decision": {
+    "action": "approve",
+    "comment": "ok"
+  },
+  "supplement": null,
+  "listing": {
+    "title": "望京西园 南向两居 拎包入住 近地铁",
+    "city": "北京",
+    "community": "望京西园",
+    "community_id": "C001",
+    "price": 6800,
+    "rooms": 2,
+    "area": 89,
+    "floor": 6,
+    "total_floors": 18,
+    "orientation": "南",
+    "gps": [
+      116.4612,
+      39.9961
+    ],
+    "agent_id": "AGT001",
+    "description": "正规两居室，家具家电齐全，业主自住装修，随时看房。",
+    "images": [
+      {
+        "path": "images/normal_01/1.jpg",
+        "mock": {
+          "authenticity": 0.98,
+          "phash": "a1b2c3d4e5f60708",
+          "is_duplicate": false,
+          "detected_rooms": 2,
+          "ocr_text": ""
+        }
+      },
+      {
+        "path": "images/normal_01/2.jpg",
+        "mock": {
+          "authenticity": 0.97,
+          "phash": "b2c3d4e5f60708a1",
+          "is_duplicate": false,
+          "detected_rooms": 2,
+          "ocr_text": ""
+        }
+      },
+      {
+        "path": "images/normal_01/3.jpg",
+        "mock": {
+          "authenticity": 0.96,
+          "phash": "c3d4e5f60708a1b2",
+          "is_duplicate": false,
+          "detected_rooms": 2,
+          "ocr_text": ""
+        }
+      }
+    ],
+    "videos": [
+      {
+        "path": "videos/normal_01/1.mp4",
+        "mock": {
+          "keyframe_authenticity": 0.95,
+          "detected_rooms": 2,
+          "asr_text": "这边是客厅，两个卧室朝南，采光很好",
+          "asr_risk": ""
+        }
+      }
+    ]
+  }
+}

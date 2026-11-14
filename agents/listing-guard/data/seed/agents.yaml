@@ -1,0 +1,25 @@
+# 发房人主数据：行为与信用因子来源
+agents:
+  - id: AGT001
+    name: 王小明
+    level: A
+    violation_rate: 0.02
+    takedown_rate: 0.05
+
+  - id: AGT002
+    name: 李姐
+    level: B
+    violation_rate: 0.08
+    takedown_rate: 0.10
+
+  - id: AGT003
+    name: 中介老刘
+    level: C
+    violation_rate: 0.25
+    takedown_rate: 0.30
+
+  - id: AGT004
+    name: 房东直租-赵
+    level: A
+    violation_rate: 0.01
+    takedown_rate: 0.02

@@ -1,0 +1,26 @@
+{
+  "case_id": "text_image_mismatch_04",
+  "expected": "review",
+  "note": "图文不符：描述 3 室但实拍仅 1 室，面积与 GPS 也不自洽，转人工",
+  "gov_status": "passed",
+  "human_decision": {"action": "approve", "comment": "实为合租单间挂整租标题，要求改标题后放行"},
+  "supplement": null,
+  "listing": {
+    "title": "望京西园 三居室整租 45 平急租",
+    "city": "北京",
+    "community": "望京西园",
+    "community_id": "C001",
+    "price": 7000,
+    "rooms": 3,
+    "area": 45,
+    "floor": 2,
+    "total_floors": 18,
+    "orientation": "东",
+    "gps": [116.6010, 40.1020],
+    "agent_id": "AGT002",
+    "description": "三居室整租，价格可谈。",
+    "images": [
+      {"path": "images/text_image_mismatch_04/1.jpg", "mock": {"authenticity": 0.8, "phash": "08a1b2c3d4e5f607", "is_duplicate": false, "detected_rooms": 1, "ocr_text": ""}}
+    ]
+  }
+}

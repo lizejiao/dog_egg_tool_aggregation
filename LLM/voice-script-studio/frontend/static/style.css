@@ -1,0 +1,146 @@
+/* Voice Script Studio —— 浅色简洁主题，无框架无构建 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  background: #f5f6f8; color: #1f2329; font-size: 14px; line-height: 1.6;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  display: flex; align-items: center; gap: 32px;
+  padding: 12px 32px; background: #fff; border-bottom: 1px solid #e2e4e9;
+  position: sticky; top: 0; z-index: 10;
+}
+.brand { font-size: 17px; font-weight: 600; }
+.tabs { display: flex; gap: 4px; }
+.tab {
+  border: none; background: none; padding: 8px 16px; font-size: 14px;
+  border-radius: 8px; cursor: pointer; color: #5a6472;
+}
+.tab:hover { background: #f0f2f5; }
+.tab.active { background: #1f2329; color: #fff; }
+
+/* ---------- 布局 ---------- */
+main { padding: 24px 32px; max-width: 1280px; margin: 0 auto; }
+.view.hidden, .hidden { display: none !important; }
+.panel {
+  background: #fff; border: 1px solid #e2e4e9; border-radius: 12px;
+  padding: 20px; margin-bottom: 16px;
+}
+.panel h2 { font-size: 15px; margin-bottom: 12px; }
+.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+
+/* ---------- 表单 ---------- */
+label { display: block; margin-bottom: 12px; font-weight: 500; }
+input[type="text"], input:not([type]), input[type="password"], input[type="number"],
+textarea, select {
+  width: 100%; padding: 8px 10px; margin-top: 4px; font-size: 14px;
+  border: 1px solid #d4d7dd; border-radius: 8px; font-family: inherit;
+}
+input[type="file"] { margin-top: 6px; font-size: 13px; }
+input[type="range"] { margin-top: 6px; }
+textarea { resize: vertical; }
+.row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+
+/* ---------- 按钮 ---------- */
+.btn {
+  padding: 8px 18px; border-radius: 8px; border: 1px solid #d4d7dd;
+  background: #fff; cursor: pointer; font-size: 14px; text-decoration: none;
+  color: #1f2329; display: inline-block;
+}
+.btn:hover { background: #f0f2f5; }
+.btn.primary { background: #1f2329; color: #fff; border-color: #1f2329; }
+.btn.primary:hover { background: #3a4048; }
+.btn.big { padding: 12px 28px; font-size: 15px; }
+.btn.danger { color: #c0392b; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- 消息与提示 ---------- */
+.msg { font-size: 13px; }
+.msg.ok { color: #1e7e34; } .msg.err { color: #c0392b; }
+.hint { font-size: 12.5px; color: #6b7480; margin-bottom: 10px; }
+.hint-inline { font-size: 12px; color: #6b7480; font-weight: 400; }
+
+/* ---------- 音色卡片 ---------- */
+.voice-list { display: grid; gap: 10px; }
+.voice-card {
+  border: 1px solid #e2e4e9; border-radius: 10px; padding: 12px 14px;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.voice-card .name { font-weight: 600; }
+.voice-card .meta { font-size: 12px; color: #6b7480; }
+.voice-card .ops { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+/* ---------- 进度 ---------- */
+.progressbar {
+  height: 10px; background: #eceef2; border-radius: 5px; overflow: hidden; margin: 10px 0;
+}
+#progress-fill { height: 100%; width: 0; background: #1f9d61; transition: width .4s; }
+.segment-list { max-height: 320px; overflow-y: auto; margin: 10px 0; border: 1px solid #eef0f3; border-radius: 8px; }
+.seg-row {
+  display: flex; gap: 10px; padding: 7px 12px; align-items: center;
+  border-bottom: 1px solid #f0f2f5; font-size: 13px;
+}
+.seg-row:last-child { border-bottom: none; }
+.seg-status { width: 70px; flex-shrink: 0; }
+.seg-status.ok { color: #1e7e34; } .seg-status.failed { color: #c0392b; }
+.seg-status.running, .seg-status.pending { color: #9a6b00; }
+.seg-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #444; }
+
+/* ---------- 设置 ---------- */
+.provider-card { margin-bottom: 14px; }
+.provider-card .head {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+}
+.badge {
+  font-size: 12px; padding: 2px 10px; border-radius: 10px;
+  background: #eef4ff; color: #2f5fd0;
+}
+.badge.on { background: #e6f7ee; color: #12714b; }
+.badge.err { background: #fdeeee; color: #a32d2d; }
+.switch { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ---------- 表格 ---------- */
+.table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.table th, .table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #eef0f3; }
+.table th { color: #6b7480; font-weight: 500; }
+.table tr:hover td { background: #fafbfc; }
+
+/* ---------- 直接录音克隆 ---------- */
+.rec-controls {
+  display: flex; align-items: center; gap: 14px;
+  margin: 12px 0; padding: 12px 14px;
+  border: 1px solid #eef0f3; border-radius: 10px; background: #fafbfc;
+}
+.rec-timer {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px; color: #444; min-width: 68px;
+}
+.rec-level {
+  display: flex; align-items: flex-end; gap: 3px; height: 34px; flex: 1;
+}
+.rec-level i {
+  display: block; width: 4px; border-radius: 2px;
+  background: #b7c4e4; height: 3px;
+  transition: height 80ms linear, background 200ms linear;
+}
+.rec-level.live i { background: #4a72d0; }
+.rec-audio { width: 100%; margin: 10px 0; }
+#rec-review { margin-top: 12px; border-top: 1px dashed #eef0f3; padding-top: 12px; }
+#rec-review .meta { margin-bottom: 8px; }
+#rec-review label { display: block; margin: 10px 0; }
+#rec-review .row { display: flex; gap: 10px; margin-top: 12px; }
+
+/* ---------- 预置音色库手动同步按钮 ---------- */
+h2 .btn-refresh {
+  margin-left: auto; float: right;
+  padding: 4px 10px; font-size: 13px;
+}
+h2 .btn-refresh:disabled { opacity: .6; cursor: wait; }
+
+/* 不可用按钮（如缺 lameenc 的 MP3 导出）：置灰 + 禁止点击 */
+.btn.disabled, a.btn.disabled {
+  opacity: .5; cursor: not-allowed; pointer-events: auto;
+  filter: grayscale(.6);
+}

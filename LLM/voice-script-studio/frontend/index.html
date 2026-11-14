@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Script Studio</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🎙️ Voice Script Studio</div>
+    <nav class="tabs">
+      <button class="tab" data-view="voices">音色库</button>
+      <button class="tab active" data-view="workbench">合成工作台</button>
+      <button class="tab" data-view="settings">引擎设置</button>
+      <button class="tab" data-view="history">任务历史</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ======================== 音色库 ======================== -->
+    <section id="view-voices" class="view hidden">
+      <div class="panel" id="rec-panel">
+        <h2>直接录音克隆</h2>
+        <p class="hint">安静环境、离麦克风约 20 厘米、正常语速朗读下方提示词（可按需编辑）。照稿朗读可确保逐字稿与录音<b>一字不差</b>。建议录音 15~40 秒；仅克隆本人或已授权声线。点击「开始录音」后浏览器会请求麦克风权限（仅 localhost / HTTPS 页面可用）。</p>
+        <label>录音提示词（朗读内容，提交时即逐字稿）
+          <textarea id="rec-prompt" rows="4"></textarea>
+        </label>
+        <div class="rec-controls">
+          <button id="rec-btn" class="btn primary">开始录音</button>
+          <span id="rec-timer" class="rec-timer">00:00.0</span>
+          <div id="rec-level" class="rec-level" aria-hidden="true"></div>
+        </div>
+        <div id="rec-review" class="hidden">
+          <p class="meta">录音时长：<b id="rec-duration"></b><span id="rec-warn" class="msg"></span></p>
+          <audio id="rec-audio" controls class="rec-audio"></audio>
+          <label>音色名称 <input id="rec-name" placeholder="例如：我的演讲声"></label>
+          <div class="row">
+            <button id="rec-submit" class="btn primary">创建音色并注册引擎</button>
+            <button id="rec-redo" class="btn">重新录音</button>
+          </div>
+        </div>
+        <span id="rec-msg" class="msg"></span>
+      </div>
+
+      <div class="grid-2col">
+        <div class="panel">
+          <h2>上传克隆音色</h2>
+          <p class="hint">上传 10~30 秒<b>干净单人声</b>录音（wav/mp3/m4a），逐字稿必须与录音内容一字不差——逐字稿质量对克隆相似度的影响大于引擎选择。仅克隆本人或已授权声线。</p>
+          <form id="voice-form">
+            <label>音色名称 <input name="name" required placeholder="例如：我的演讲声"></label>
+            <label>参考音频
+              <input name="audio" type="file" accept=".wav,.mp3,.m4a,.opus" required>
+            </label>
+            <label>逐字稿（录音里说的话）
+              <textarea name="ref_text" rows="3" required placeholder="与录音内容完全一致的文字"></textarea>
+            </label>
+            <button type="submit" class="btn primary">创建音色并注册引擎</button>
+            <span id="voice-msg" class="msg"></span>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>我的克隆音色</h2>
+          <div id="clone-list" class="voice-list"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>引擎预置音色
+          <span class="hint-inline">（来自云端音色库，随引擎启用同步）</span>
+          <button id="btn-refresh-presets" class="btn btn-refresh" title="清空缓存并重新拉取各引擎音色（网页端刚创建的音色无需等 60 秒）">🔄 同步音色库</button>
+        </h2>
+        <div id="preset-list" class="voice-list"></div>
+      </div>
+    </section>
+
+    <!-- ======================== 合成工作台 ======================== -->
+    <section id="view-workbench" class="view">
+      <div class="grid-2col">
+        <div class="panel">
+          <h2>演讲稿</h2>
+          <label>稿件标题 <input id="task-title" placeholder="可选，默认取文件名"></label>
+          <div class="row">
+            <input type="file" id="script-file" accept=".txt,.md">
+            <span id="upload-msg" class="msg"></span>
+          </div>
+          <textarea id="task-text" rows="14" placeholder="粘贴演讲稿（支持 Markdown），或点击上方按钮上传 .txt / .md 文件"></textarea>
+          <p class="hint" id="script-stats">支持内联情绪标签：[pause] [excited] 等（仅 Fish 引擎生效）</p>
+        </div>
+
+        <div class="panel">
+          <h2>合成参数</h2>
+          <label>音色
+            <select id="voice-select"><option value="">请先在音色库创建/启用音色</option></select>
+          </label>
+          <label>语音引擎
+            <select id="provider-select"><option value="">加载中…</option></select>
+          </label>
+          <label>语速 <span id="speed-val">1.0</span>
+            <input id="speed" type="range" min="0.5" max="2" step="0.1" value="1.0">
+          </label>
+          <label>句间停顿（秒）
+            <input id="pause" type="number" step="0.05" min="0" max="2" value="0.35">
+          </label>
+          <button id="start-btn" class="btn primary big">开始合成</button>
+          <span id="start-msg" class="msg"></span>
+        </div>
+      </div>
+
+      <div class="panel hidden" id="progress-panel">
+        <h2>合成进度 <span id="progress-title" class="hint-inline"></span></h2>
+        <div class="progressbar"><div id="progress-fill"></div></div>
+        <p id="progress-text"></p>
+        <div id="segment-list" class="segment-list"></div>
+        <div class="row">
+          <a id="download-wav" class="btn primary hidden" href="#">下载音频 (WAV)</a>
+          <a id="download-m4a" class="btn hidden" href="#" title="AAC 编码，体积约为 WAV 的 1/5，系统自带编码器">下载音频 (M4A)</a>
+          <a id="download-mp3" class="btn hidden" href="#" title="MP3 128kbps，兼容性最好">下载音频 (MP3)</a>
+          <button id="retry-all-btn" class="btn hidden">续跑/重试失败段</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================== 引擎设置 ======================== -->
+    <section id="view-settings" class="view hidden">
+      <div id="settings-list"></div>
+    </section>
+
+    <!-- ======================== 任务历史 ======================== -->
+    <section id="view-history" class="view hidden">
+      <div class="panel">
+        <h2>任务历史</h2>
+        <table class="table" id="task-table">
+          <thead><tr>
+            <th>时间</th><th>标题</th><th>引擎</th><th>状态</th>
+            <th>进度</th><th>操作</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

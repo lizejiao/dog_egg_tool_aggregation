@@ -1,0 +1,27 @@
+{
+  "case_id": "duplicate_listing_11",
+  "expected": "review",
+  "note": "重复房源：pHash 精确命中历史房源库（跨发房人盗图重复贴），强因子转人工核实",
+  "gov_status": "passed",
+  "human_decision": {"action": "reject", "comment": "确认盗用他人房源图重复发布，驳回"},
+  "supplement": null,
+  "listing": {
+    "title": "丽都一品 精装两居 急租价格可谈",
+    "city": "北京",
+    "community": "丽都一品",
+    "community_id": "C002",
+    "price": 8300,
+    "rooms": 2,
+    "area": 91,
+    "floor": 9,
+    "total_floors": 24,
+    "orientation": "南北",
+    "gps": [116.4750, 39.9702],
+    "agent_id": "AGT002",
+    "description": "精装两居室，急租，价格可谈，随时看房。",
+    "images": [
+      {"path": "images/duplicate_listing_11/1.jpg", "mock": {"authenticity": 0.92, "phash": "f60708a1b2c3d4e5", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}},
+      {"path": "images/duplicate_listing_11/2.jpg", "mock": {"authenticity": 0.9, "phash": "aa11bb22cc33dd44", "is_duplicate": false, "detected_rooms": 2, "ocr_text": ""}}
+    ]
+  }
+}
