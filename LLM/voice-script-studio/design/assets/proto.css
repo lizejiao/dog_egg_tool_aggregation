@@ -1,0 +1,121 @@
+/* P0 静态原型共用样式 —— 模拟 Element Plus 蓝白专业风视觉
+   仅设计稿用，P1 起由 Element Plus 真实组件替代 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: #f0f2f5; color: #303133; font-size: 14px;
+}
+a { color: #409eff; text-decoration: none; }
+
+/* ---------- 顶栏导航 ---------- */
+.topbar {
+  height: 56px; background: #fff; border-bottom: 1px solid #e4e7ed;
+  display: flex; align-items: center; padding: 0 28px; gap: 36px;
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar .logo { font-size: 17px; font-weight: 600; color: #409eff; }
+.topbar .nav { display: flex; gap: 6px; }
+.topbar .nav a {
+  padding: 6px 14px; border-radius: 6px; color: #606266; font-size: 14px;
+}
+.topbar .nav a.active { background: #ecf5ff; color: #409eff; font-weight: 500; }
+.topbar .spacer { flex: 1; }
+.topbar .status { font-size: 13px; color: #909399; }
+
+/* ---------- 布局容器 ---------- */
+.page { max-width: 1400px; margin: 0 auto; padding: 20px 28px 40px; }
+.panel {
+  background: #fff; border-radius: 8px; padding: 18px 20px;
+  border: 1px solid #ebeef5; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.panel h2 {
+  font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #303133;
+  display: flex; align-items: center; gap: 8px;
+}
+.panel h2 .sub { font-size: 12px; font-weight: 400; color: #909399; }
+
+/* ---------- 通用控件（模拟 EP） ---------- */
+.ep-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; padding: 0 15px; border-radius: 5px; font-size: 13px;
+  border: 1px solid #dcdfe6; background: #fff; color: #606266; cursor: pointer;
+  transition: all .15s;
+}
+.ep-btn:hover { color: #409eff; border-color: #c6e2ff; background: #ecf5ff; }
+.ep-btn.primary { background: #409eff; border-color: #409eff; color: #fff; }
+.ep-btn.primary:hover { background: #66b1ff; }
+.ep-btn.small { height: 26px; padding: 0 10px; font-size: 12px; }
+.ep-btn.danger { color: #f56c6c; border-color: #fbc4c4; }
+.ep-btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+.ep-input, .ep-select, .ep-textarea {
+  width: 100%; height: 32px; border: 1px solid #dcdfe6; border-radius: 5px;
+  padding: 0 10px; font-size: 13px; color: #303133; background: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ep-textarea { height: auto; padding: 8px 10px; min-height: 72px; align-items: flex-start; }
+.ep-select::after { content: "▾"; color: #c0c4cc; }
+.ep-label { display: block; font-size: 13px; color: #606266; margin: 12px 0 6px; }
+
+/* ---------- 徽章 ---------- */
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 12px;
+  line-height: 1.5;
+}
+.badge.ok   { background: #f0f9eb; color: #67c23a; border: 1px solid #e1f3d8; }
+.badge.miss { background: #fdf6ec; color: #e6a23c; border: 1px solid #faecd8; }
+.badge.own  { background: #ecf5ff; color: #409eff; border: 1px solid #d9ecff; }
+.badge.info { background: #f4f4f5; color: #909399; border: 1px solid #e9e9eb; }
+
+/* ---------- 卡片 ---------- */
+.card {
+  border: 1px solid #ebeef5; border-radius: 7px; padding: 12px 14px; margin-bottom: 10px;
+  background: #fff;
+}
+.card.sel { border-color: #409eff; box-shadow: 0 0 0 1px #409eff inset; background: #f5faff; }
+.card .title { font-weight: 600; font-size: 13.5px; margin-bottom: 5px; }
+.card .desc { font-size: 12.5px; color: #909399; line-height: 1.7; }
+.card .ops { margin-top: 9px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- 步骤条 ---------- */
+.steps { display: flex; flex-direction: column; gap: 4px; }
+.step {
+  display: flex; gap: 10px; padding: 11px 12px; border-radius: 7px;
+  align-items: flex-start;
+}
+.step .no {
+  width: 22px; height: 22px; border-radius: 50%; background: #e4e7ed; color: #909399;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;
+}
+.step.doing .no { background: #409eff; color: #fff; }
+.step.done .no { background: #67c23a; color: #fff; }
+.step .t { font-weight: 600; font-size: 13.5px; }
+.step .d { font-size: 12px; color: #909399; margin-top: 3px; line-height: 1.6; }
+
+/* ---------- 进度条 ---------- */
+.progress { height: 8px; background: #ebeef5; border-radius: 4px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: #409eff; border-radius: 4px; }
+
+/* ---------- 段列表 ---------- */
+.seg-row {
+  display: flex; gap: 8px; align-items: center; padding: 7px 4px;
+  border-bottom: 1px dashed #ebeef5; font-size: 12.5px;
+}
+.seg-row .st { width: 44px; text-align: center; flex-shrink: 0; }
+.seg-row .st.ok { color: #67c23a; }
+.seg-row .st.fail { color: #f56c6c; }
+.seg-row .st.run { color: #409eff; }
+.seg-row .tx { flex: 1; color: #606266; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- 提示条 ---------- */
+.tip {
+  border-radius: 5px; padding: 8px 12px; font-size: 12.5px; margin: 10px 0;
+  border: 1px solid;
+}
+.tip.warn { background: #fdf6ec; color: #b88230; border-color: #faecd8; }
+.tip.ok   { background: #f0f9eb; color: #529b2e; border-color: #e1f3d8; }
+.tip.info { background: #ecf5ff; color: #3a8ee6; border-color: #d9ecff; }
+
+/* ---------- 录音控件 ---------- */
+.rec-level { display: flex; align-items: flex-end; gap: 3px; height: 34px; flex: 1; }
+.rec-level i { display: block; width: 4px; border-radius: 2px; background: #b7c4e4; }

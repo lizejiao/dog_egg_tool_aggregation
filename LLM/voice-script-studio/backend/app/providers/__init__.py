@@ -61,6 +61,7 @@ def list_available() -> List[Dict]:
                 "supports_emotion_tags": caps.supports_emotion_tags,
                 "has_preset_voices": caps.has_preset_voices,
                 "max_concurrency": caps.max_concurrency,
+                "supported_params": caps.supported_params,   # P2-0：参数面板动态渲染依据
                 "notes": caps.notes,
                 "implemented": True,
             })
@@ -70,6 +71,14 @@ def list_available() -> List[Dict]:
                 item["api_key_masked"] = config_store.mask_key(
                     config_store.get_fish_api_key({"providers": {"fish_cloud": prov_cfg}}))
                 item["api_key_configured"] = bool(item["api_key_masked"])
+            if pid == "cosyvoice_local":
+                from app.providers.cosyvoice_local import warm_info
+                item["fp16"] = bool(prov_cfg.get("fp16", False))
+                item["idle_kill_s"] = int(prov_cfg.get("idle_kill_s", 1800))
+                item["timeout_s"] = int(prov_cfg.get("timeout_s", 600))
+                wi = warm_info()
+                item["warm_state"] = wi["warm_state"]
+                item["warm_remaining_s"] = wi["remaining_s"]
         except Exception as e:
             # 单个引擎构造失败不影响其他引擎展示
             item["error"] = str(e)

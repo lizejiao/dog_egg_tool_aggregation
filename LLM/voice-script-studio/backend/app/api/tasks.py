@@ -25,7 +25,12 @@ class CreateTaskBody(BaseModel):
 
 @router.post("")
 def create_task(body: CreateTaskBody) -> Dict:
-    """清洗→分句→落库→启动合成线程。"""
+    """清洗→分句→落库→启动合成线程。
+
+    本地引擎未暖机：创建放行（可先建稿），开始合成时若未暖机返回
+    409 + error=not_warmed（前端引导去设置页暖机）。
+    """
+    from app.providers.cosyvoice_local import NotWarmedError
     try:
         task_id = TaskRunner.create_task(
             title=body.title or "未命名稿件", raw_text=body.text,
@@ -36,7 +41,10 @@ def create_task(body: CreateTaskBody) -> Dict:
         raise HTTPException(400, str(e))
     except (KeyError, PermissionError) as e:
         raise HTTPException(400, str(e))
-    return TaskRunner.start_or_resume(task_id)
+    try:
+        return TaskRunner.start_or_resume(task_id)
+    except NotWarmedError as e:
+        raise HTTPException(409, str(e))
 
 
 @router.get("")
@@ -63,10 +71,13 @@ def get_task(task_id: str) -> Dict:
 @router.post("/{task_id}/retry")
 def retry_task(task_id: str) -> Dict:
     """断点续跑/失败重跑：只处理未完成段（ok 段自动跳过）。"""
+    from app.providers.cosyvoice_local import NotWarmedError
     try:
         return TaskRunner.start_or_resume(task_id)
     except KeyError as e:
         raise HTTPException(404, str(e))
+    except NotWarmedError as e:
+        raise HTTPException(409, str(e))
 
 
 @router.post("/{task_id}/segments/{seq}/retry")

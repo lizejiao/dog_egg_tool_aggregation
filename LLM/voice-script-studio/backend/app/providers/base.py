@@ -32,6 +32,12 @@ class Caps:
     sample_rate_hz: int = 24000    # 引擎输出采样率（拼接层据此归一）
     has_preset_voices: bool = False       # 是否有自带音色
     needs_registration: bool = True       # 克隆音色是否需先注册（本地克隆型=是，mock=否）
+    # 支持的合成参数（2026-11-15 新增，P2-0）：参数名 → 是否支持。
+    # 前端按此**动态渲染参数面板，不支持的不显示**（不置灰）——
+    # 引擎能力变更只改此处一处声明，禁止前端硬编码。
+    # 当前键约定：speed（语速倍数）/ volume（音量，Fish 为 dB 偏移）。
+    supported_params: Dict[str, bool] = field(
+        default_factory=lambda: {"speed": False, "volume": False})
     notes: str = ""
 
 
@@ -46,8 +52,13 @@ class VoiceMeta:
 
 @dataclass
 class SynthParams:
-    """合成参数（v1 仅语速；后续可扩展 pitch 等）。"""
+    """合成参数。取值只在引擎声明 supported_params 后才会被传入（runner 侧守门）。
+
+    - speed：语速倍数（0.5~2.0），CosyVoice3/Fish 均原生支持
+    - volume_db：音量 dB 偏移（-20~20，0=不改）；仅 Fish（prosody.volume 单位是 dB）
+    """
     speed: float = 1.0
+    volume_db: float = 0.0
     emotion_tags_allowed: bool = True  # 由调用方按 Caps 决定是否传标签文本
 
 
@@ -94,6 +105,13 @@ class TTSProvider(ABC):
     def test_connection(self) -> Dict[str, Any]:
         """连通性/健康检查。Returns: {"ok": bool, "message": str}"""
         return {"ok": True, "message": "无外部依赖"}
+
+    def warmup(self) -> Dict[str, Any]:
+        """预热引擎（本地大模型加载权重、云端建连等）。
+
+        默认实现：无需暖机。慢启动引擎（如 CosyVoice3 本地）覆写此方法。
+        """
+        return {"ok": True, "message": "该引擎无需暖机"}
 
     def list_preset_voices(self) -> List[VoiceMeta]:
         """列出引擎自带音色。无预置音色的引擎返回空列表。"""

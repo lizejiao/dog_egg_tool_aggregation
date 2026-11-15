@@ -8,7 +8,12 @@ import os
 # 项目根目录：backend/ 的上一级
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # backend/
 PROJECT_DIR = os.path.dirname(BACKEND_DIR)                                # voice-script-studio/
-FRONTEND_DIR = os.path.join(PROJECT_DIR, "frontend")
+# 前端目录：优先新版构建产物（frontend-vue/dist），未构建时回退归档版（frontend-legacy/，
+# P3 前的旧单页）。两者并存期可用 VSS_FRONTEND_DIR 强制指定。
+_DIST_DIR = os.path.join(PROJECT_DIR, "frontend-vue", "dist")
+_LEGACY_DIR = os.path.join(PROJECT_DIR, "frontend-legacy")
+FRONTEND_DIR = os.environ.get("VSS_FRONTEND_DIR") or (
+    _DIST_DIR if os.path.isfile(os.path.join(_DIST_DIR, "index.html")) else _LEGACY_DIR)
 
 # 运行数据目录（全部 gitignore）。测试时可用 VSS_DATA_DIR 指向临时目录隔离。
 DATA_DIR = os.environ.get(

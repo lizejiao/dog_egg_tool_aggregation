@@ -97,45 +97,51 @@ async function refreshPresets() {
 }
 
 function renderVoices() {
-  // 我的克隆音色
-  const cloneBox = $("#clone-list");
+  // 我的声音素材库（统一列表：已注册卡片=徽章矩阵+试听；未注册=各引擎注册按钮）
+  const matBox = $("#material-list");
   if (!presetCache.clones.length) {
-    cloneBox.innerHTML = `<p class="hint">暂无克隆音色，请从左侧上传创建。</p>`;
+    matBox.innerHTML = `<p class="hint">暂无素材——从上方录音或上传创建。</p>`;
   } else {
-    cloneBox.innerHTML = presetCache.clones.map((v) => {
-      const regs = Object.entries(v.registrations || {})
-        .map(([pid, r]) => `${pid}:${r.state}`).join("，");
-      const unregHint = !regs
-        ? `<br><b>未注册任何引擎</b>：可在下方下载参考音频、复制逐字稿，到 fish.audio 网页端
-           「创建音色」上传（免费含 3 个槽位），创建后会自动同步到引擎预置音色`
-        : "";
+    matBox.innerHTML = presetCache.clones.map((v) => {
+      const regs = v.registrations || {};
+      const hasReg = Object.keys(regs).length > 0;
+      const badges = Object.keys(providerNames).map((pid) => {
+        const reg = regs[pid];
+        return reg
+          ? `<span class="badge ok" title="已注册，可用于合成">✓ ${esc(providerNames[pid])}</span>`
+          : `<span class="badge miss" title="未注册">${esc(providerNames[pid])} 未注册
+               <a href="#" onclick="registerVoice('${v.id}','${pid}');return false">补注册</a></span>`;
+      }).join(" ");
       return `<div class="voice-card" data-id="${v.id}">
         <div><div class="name">${esc(v.name)}</div>
-          <div class="meta">逐字稿：${esc(v.ref_text.slice(0, 40))}…<br>注册状态：${esc(regs) || "未注册任何引擎"}${unregHint}</div>
+          <div class="meta">逐字稿：${esc(v.ref_text.slice(0, 40))}…<br>
+            ${hasReg ? `可用于：${badges}` : `素材未注册，暂不能用于合成——点下方按钮注册后即可`}</div>
         </div>
         <div class="ops">
-          <button class="btn" onclick="previewVoice('clone:${v.id}')">试听</button>
+          ${hasReg ? `<button class="btn" onclick="previewVoice('clone:${v.id}')">试听</button>` : ""}
+          ${hasReg ? "" : Object.keys(providerNames).map((pid) =>
+            `<button class="btn" onclick="registerVoice('${v.id}','${pid}')">注册到 ${esc(providerNames[pid])}</button>`).join(" ")}
           <button class="btn" onclick="downloadRefAudio('${v.id}')">下载参考音频</button>
           <button class="btn" onclick="copyRefText('${v.id}')">复制逐字稿</button>
-          ${(v.registrations || {}).fish_cloud ? "" : `<button class="btn" onclick="registerVoice('${v.id}')">补注册到 Fish 云端</button>`}
           <button class="btn danger" onclick="deleteVoice('${v.id}','${esc(v.name)}')">删除</button>
         </div>
       </div>`;
     }).join("");
   }
 
-  // 引擎预置音色
+  // 引擎预置音色（标注所属引擎专属——只能配该引擎用）
   const presetBox = $("#preset-list");
   const groups = [];
   for (const [pid, items] of Object.entries(presetCache.presets || {})) {
+    const pname = providerNames[pid] || pid;
     if (Array.isArray(items) && items.length) {
-      groups.push(`<p class="hint-inline">${esc(pid)} · ${items.length} 个音色</p>` +
+      groups.push(`<p class="hint-inline">${esc(pname)} · ${items.length} 个音色</p>` +
         `<div class="voice-list">` + items.map((m) => {
           const st = presetStateLabel(m.state);
           return `
           <div class="voice-card">
             <div><div class="name">${esc(m.name)}</div>
-                 <div class="meta">${esc(st.label)} · ${esc(m.voice_key)}</div></div>
+                 <div class="meta"><span class="badge own" title="该音色只可用于此引擎">${esc(pname)} 专属</span> ${esc(st.label)}</div></div>
             <div class="ops">${st.ready
               ? `<button class="btn" onclick="previewVoice('${esc(m.voice_key)}')">试听</button>`
               : `<button class="btn" disabled>试听</button>`}</div>
@@ -153,27 +159,38 @@ function renderVoices() {
 // 手动同步引擎音色库按钮
 $("#btn-refresh-presets").addEventListener("click", () => refreshPresets());
 
-$("#voice-form").addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  const form = ev.target;
-  const btn = form.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = "上传中…";
+async function submitVoiceForm(registerMode) {
+  // registerMode: "register"=注册下拉所选引擎（表单 submit）；"save"=仅保存素材
+  const form = $("#voice-form");
+  const fd = new FormData(form);
+  if (registerMode === "save") fd.set("register_provider", "none");
+  const btn = registerMode === "save" ? $("#voice-save") : form.querySelector("button[type=submit]");
+  btn.disabled = true;
+  const old = btn.textContent;
+  btn.textContent = registerMode === "save" ? "保存中…" : "注册中…";
   try {
-    const fd = new FormData(form);
     const result = await api("/api/voices", { method: "POST", body: fd });
-    const errs = Object.entries(result.register_errors || {})
-      .map(([pid, e]) => `${pid}: ${e}`).join("；");
-    setMsg("#voice-msg", errs
-      ? `音色已保存，但部分引擎注册失败——${errs}（稍后可在音色卡上补注册）`
-      : "音色创建成功，已注册到可用引擎", !errs);
+    const pname = providerNames[result.registered_provider] || result.registered_provider;
+    setMsg("#voice-msg", result.material_only
+      ? `素材「${result.name}」已保存到声音素材库（未注册引擎，可在卡片上补注册后合成）`
+      : `✓ 素材已保存并注册到 ${pname}，「${result.name}」可立即合成`, true);
     form.reset();
     loadVoices();
+    renderVoiceSelectFor();   // 级联下拉同步刷新
   } catch (e) {
-    setMsg("#voice-msg", e.message, false);
+    // 后端整体回滚：失败即未入库（含原因与建议）
+    setMsg("#voice-msg", `操作失败：${e.message}${registerMode === "register" ? "——可改点「保存素材」先保留录音" : ""}`, false);
   } finally {
-    btn.disabled = false; btn.textContent = "创建音色并注册引擎";
+    btn.disabled = false;
+    btn.textContent = old;
   }
+}
+
+$("#voice-form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  await submitVoiceForm("register");
 });
+$("#voice-save").addEventListener("click", () => submitVoiceForm("save"));
 
 async function deleteVoice(vid, name) {
   if (!confirm(`确定删除音色「${name}」？引擎侧模型将一并删除。`)) return;
@@ -202,12 +219,12 @@ async function copyRefText(vid) {
 }
 
 // 补注册到 Fish 云端：失败原因（配额/网络）由后端以 400 返回并在此提示
-async function registerVoice(vid) {
+async function registerVoice(vid, pid = "fish_cloud") {
   try {
-    await api(`/api/voices/${vid}/register/fish_cloud`, { method: "POST" });
+    await api(`/api/voices/${vid}/register/${pid}`, { method: "POST" });
     loadVoices();
   } catch (e) {
-    alert("补注册失败：" + e.message);
+    alert(`补注册到 ${providerNames[pid] || pid} 失败：` + e.message);
   }
 }
 
@@ -248,7 +265,8 @@ $("#rec-level").innerHTML = "<i></i>".repeat(LEVEL_BARS);
 
 $("#rec-btn").addEventListener("click", () => (rec.running ? stopRecording() : startRecording()));
 $("#rec-redo").addEventListener("click", resetReview);
-$("#rec-submit").addEventListener("click", submitRecording);
+$("#rec-submit").addEventListener("click", () => submitRecording("register"));
+$("#rec-save").addEventListener("click", () => submitRecording("save"));
 
 async function startRecording() {
   setMsg("#rec-msg", "");
@@ -364,8 +382,8 @@ function stopRecording() {
   $("#rec-duration").textContent = rec.durationS.toFixed(1) + " 秒";
   if (rec.durationS < 10) {
     setMsg("#rec-warn", "　偏短：建议 15 秒以上，克隆相似度会更好", false);
-  } else if (rec.durationS > 60) {
-    setMsg("#rec-warn", "　偏长：建议控制在 40 秒以内", false);
+  } else if (rec.durationS > 30) {
+    setMsg("#rec-warn", `　超长：${rec.durationS.toFixed(1)} 秒已超 30 秒上限（CosyVoice3 本地引擎要求 ≤30 秒），提交将被拦截——请停止后重录，或去上传面板截短`, false);
   } else {
     setMsg("#rec-warn", "");
   }
@@ -380,7 +398,8 @@ function resetReview() {
   rec.durationS = 0;
 }
 
-async function submitRecording() {
+async function submitRecording(mode = "register") {
+  // mode: "register"=注册下拉所选引擎；"save"=仅保存素材（无失败风险）
   const name = $("#rec-name").value.trim();
   if (!name) { setMsg("#rec-msg", "请先填写音色名称", false); return; }
   if (!rec.blob) { setMsg("#rec-msg", "请先完成录音", false); return; }
@@ -391,23 +410,28 @@ async function submitRecording() {
   fd.append("name", name);
   fd.append("ref_text", refText);   // 提示词即逐字稿
   fd.append("audio", new File([rec.blob], "recording.wav", { type: "audio/wav" }));
+  fd.append("register_provider",
+    mode === "save" ? "none" : $("#rec-register-provider").value);
 
-  const btn = $("#rec-submit");
-  btn.disabled = true; btn.textContent = "提交中…";
+  const btn = mode === "save" ? $("#rec-save") : $("#rec-submit");
+  btn.disabled = true;
+  const old = btn.textContent;
+  btn.textContent = mode === "save" ? "保存中…" : "注册中…";
   try {
     const result = await api("/api/voices", { method: "POST", body: fd });
-    const errs = Object.entries(result.register_errors || {})
-      .map(([pid, e]) => `${pid}: ${e}`).join("；");
-    setMsg("#rec-msg", errs
-      ? `音色已保存，但部分引擎注册失败——${errs}（稍后可在音色卡上补注册）`
-      : "音色创建成功，已注册到可用引擎", !errs);
+    const pname = providerNames[result.registered_provider] || result.registered_provider;
+    setMsg("#rec-msg", result.material_only
+      ? `素材「${result.name}」已保存到声音素材库（未注册，可在卡片上补注册后合成）`
+      : `✓ 素材已保存并注册到 ${pname}，「${result.name}」可立即合成`, true);
     $("#rec-name").value = "";
     resetReview();
     loadVoices();
+    renderVoiceSelectFor();   // 级联下拉同步刷新
   } catch (e) {
-    setMsg("#rec-msg", e.message, false);
+    setMsg("#rec-msg", `操作失败：${e.message}${mode === "register" ? "——可改点「保存素材」先保留录音" : ""}`, false);
   } finally {
-    btn.disabled = false; btn.textContent = "创建音色并注册引擎";
+    btn.disabled = false;
+    btn.textContent = old;
   }
 }
 
@@ -488,31 +512,45 @@ async function loadProviderOptions() {
   }
 }
 
+// 引擎 display_name 缓存（徽章与级联显示用，避免露内部 ID）
+let providerNames = {};   // {pid: display_name}
+
 function renderVoiceSelect(providers) {
-  // 音色下拉：克隆音色（可用其引擎）+ 各引擎预置音色
+  providerNames = {};
+  for (const p of providers) providerNames[p.id] = p.display_name;
+  // 引擎切换 → 级联重渲染音色列表（核心联动）
+  $("#provider-select").onchange = () => renderVoiceSelectFor();
+  renderVoiceSelectFor();
+}
+
+// 级联渲染：只显示当前选中引擎可用的音色（克隆=已注册到该引擎；预置=该引擎音色库）
+function renderVoiceSelectFor() {
+  const pid = $("#provider-select").value;
+  if (!pid) {
+    $("#voice-select").innerHTML = `<option value="">请先选择语音引擎</option>`;
+    return;
+  }
   const groups = [];
   const clones = (presetCache ? presetCache.clones : null) || [];
-  if (clones.length) {
-    groups.push(`<optgroup label="我的克隆音色">` + clones.map((v) => {
-      const pid = Object.keys(v.registrations || {})[0] || "";
-      return `<option value="clone:${v.id}" data-provider="${pid}">${esc(v.name)}</option>`;
-    }).join("") + `</optgroup>`);
+  const okClones = clones.filter((v) => (v.registrations || {})[pid]);
+  if (okClones.length) {
+    groups.push(`<optgroup label="我的克隆音色（已注册到该引擎）">` + okClones.map((v) =>
+      `<option value="clone:${v.id}">${esc(v.name)}</option>`).join("") + `</optgroup>`);
   }
-  for (const p of providers) {
-    const items = presetCache && presetCache.presets && presetCache.presets[p.id];
-    if (Array.isArray(items) && items.length) {
-      groups.push(`<optgroup label="${esc(p.display_name)} 预置">` + items.map((m) =>
-        `<option value="${esc(m.voice_key)}" data-provider="${p.id}">${esc(m.name)}</option>`
-      ).join("") + `</optgroup>`);
-    }
+  const items = presetCache && presetCache.presets && presetCache.presets[pid];
+  if (Array.isArray(items) && items.length) {
+    groups.push(`<optgroup label="该引擎预置音色">` + items.map((m) =>
+      `<option value="${esc(m.voice_key)}">${esc(m.name)}</option>`).join("") + `</optgroup>`);
   }
-  $("#voice-select").innerHTML = groups.join("") || `<option value="">（暂无可用音色）</option>`;
-  // 切音色时联动引擎选择
-  $("#voice-select").onchange = (ev) => {
-    const opt = ev.target.selectedOptions[0];
-    const pid = opt && opt.dataset.provider;
-    if (pid) $("#provider-select").value = pid;
-  };
+  const sel = $("#voice-select");
+  if (groups.length) {
+    sel.innerHTML = groups.join("");
+    sel.onchange = null;   // 级联模式下引擎是主导，无需反向联动
+  } else {
+    // 该引擎无可用音色：给出针对性引导（尤其本地克隆型引擎）
+    const isLocal = pid === "cosyvoice_local";
+    sel.innerHTML = `<option value="">该引擎暂无可用音色${isLocal ? "——请到「音色库」上传参考音频或直接录音（本地引擎仅能用克隆音色）" : "，请到音色库创建并注册"}</option>`;
+  }
 }
 
 $("#speed").addEventListener("input", (ev) => { $("#speed-val").textContent = ev.target.value; });

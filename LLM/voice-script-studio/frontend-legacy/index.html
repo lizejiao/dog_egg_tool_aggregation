@@ -35,8 +35,16 @@
           <p class="meta">录音时长：<b id="rec-duration"></b><span id="rec-warn" class="msg"></span></p>
           <audio id="rec-audio" controls class="rec-audio"></audio>
           <label>音色名称 <input id="rec-name" placeholder="例如：我的演讲声"></label>
+          <label>注册到哪个引擎？（「注册引擎」按钮所用）
+            <select id="rec-register-provider">
+              <option value="cosyvoice_local" selected>CosyVoice3 本地（免费 · 离线 · 推荐）</option>
+              <option value="fish_cloud">Fish 云端（⚠️ 免费 API 档无创建配额，大概率失败）</option>
+              <option value="mock">Mock（离线自测）</option>
+            </select>
+          </label>
           <div class="row">
-            <button id="rec-submit" class="btn primary">创建音色并注册引擎</button>
+            <button id="rec-save" class="btn">保存素材</button>
+            <button id="rec-submit" class="btn primary">注册引擎</button>
             <button id="rec-redo" class="btn">重新录音</button>
           </div>
         </div>
@@ -55,14 +63,24 @@
             <label>逐字稿（录音里说的话）
               <textarea name="ref_text" rows="3" required placeholder="与录音内容完全一致的文字"></textarea>
             </label>
-            <button type="submit" class="btn primary">创建音色并注册引擎</button>
+            <label>注册到哪个引擎？（「注册引擎」按钮所用；素材归档后可随时补注册其他引擎）
+              <select name="register_provider">
+                <option value="cosyvoice_local" selected>CosyVoice3 本地（免费 · 离线 · 推荐）</option>
+                <option value="fish_cloud">Fish 云端（⚠️ 免费 API 档无创建配额，大概率失败）</option>
+                <option value="mock">Mock（离线自测）</option>
+              </select>
+            </label>
+            <div class="row">
+              <button type="button" id="voice-save" class="btn">保存素材</button>
+              <button type="submit" class="btn primary">注册引擎</button>
+            </div>
             <span id="voice-msg" class="msg"></span>
           </form>
         </div>
 
         <div class="panel">
-          <h2>我的克隆音色</h2>
-          <div id="clone-list" class="voice-list"></div>
+          <h2>我的声音素材库 <span class="hint-inline">（上传/录音的素材都在这里；注册引擎后即可用于合成）</span></h2>
+          <div id="material-list" class="voice-list"></div>
         </div>
       </div>
 
@@ -91,11 +109,11 @@
 
         <div class="panel">
           <h2>合成参数</h2>
-          <label>音色
-            <select id="voice-select"><option value="">请先在音色库创建/启用音色</option></select>
-          </label>
           <label>语音引擎
             <select id="provider-select"><option value="">加载中…</option></select>
+          </label>
+          <label>音色
+            <select id="voice-select"><option value="">请先选择语音引擎</option></select>
           </label>
           <label>语速 <span id="speed-val">1.0</span>
             <input id="speed" type="range" min="0.5" max="2" step="0.1" value="1.0">

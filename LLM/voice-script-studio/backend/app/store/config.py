@@ -96,6 +96,33 @@ def update_provider_config(provider_id: str, patch: Dict[str, Any]) -> Dict[str,
     return cfg
 
 
+# 全局合成参数：字段 → (类型, 最小值, 最大值)
+SYNTHESIS_RULES = {
+    "chars_per_segment": (int, 30, 200),
+    "max_retries": (int, 1, 5),
+    "pause_between": (float, 0.0, 2.0),
+    "pause_between_paragraphs": (float, 0.0, 3.0),
+}
+
+
+def update_synthesis_config(patch: Dict[str, Any]) -> Dict[str, Any]:
+    """更新全局合成参数（设置页调用）。越界或类型非法抛 ValueError。"""
+    cfg = load_config()
+    synth = cfg["synthesis"]
+    for key, (typ, lo, hi) in SYNTHESIS_RULES.items():
+        if key not in patch or patch[key] is None:
+            continue
+        try:
+            val = typ(patch[key])
+        except (TypeError, ValueError):
+            raise ValueError(f"{key} 需要数字")
+        if not lo <= val <= hi:
+            raise ValueError(f"{key} 超出范围（{lo}~{hi}）")
+        synth[key] = val
+    save_config(cfg)
+    return cfg["synthesis"]
+
+
 def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> None:
     """递归合并：override 中的键覆盖 base，未知顶层键忽略（防配置污染）。"""
     for key, val in override.items():

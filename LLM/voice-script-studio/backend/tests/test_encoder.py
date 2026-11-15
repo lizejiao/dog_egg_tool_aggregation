@@ -71,6 +71,20 @@ class EncoderTest(unittest.TestCase):
         encoder.encode(self.wav, "m4a")
         self.assertEqual(os.path.getmtime(m4a), mtime, "缓存未命中")
 
+    def test_m4a_24k_mono(self):
+        """24kHz 单声道母带（CosyVoice3 真实输出格式）也能转 M4A。
+
+        回归：afconvert 对 24k mono 拒绝显式 `-b` 码率
+        （"Couldn't set audio converter property ('!dat')"）。
+        """
+        wav24 = os.path.join(self.dir, "final24k.wav")
+        _make_wav(wav24, 0.5, rate=24000)
+        if not encoder.m4a_available():
+            self.skipTest("afconvert 不可用")
+        m4a = encoder.encode(wav24, "m4a")
+        self.assertEqual(open(m4a, "rb").read(8)[4:8], b"ftyp")
+        self.assertGreater(os.path.getsize(m4a), 1024)
+
     def test_invalid_format(self):
         with self.assertRaises(ValueError):
             encoder.encode(self.wav, "flac")

@@ -66,7 +66,7 @@
 | 元数据存储 | SQLite | 单文件、零运维、够用；文件类工件（音频、上传稿）直接落文件系统，库中只存路径与状态 |
 | 云端引擎 | fish-audio-sdk（官方 Python SDK） | 官方维护、含异常类/流式/voices 管理；REST 直调仅作降级备选 |
 | 本地引擎 | mlx-speech（fish-s2-pro）为主，mlx-audio（Qwen3-TTS）为备 | 与云端同源情绪标签语法可无损迁移；mlx-speech 项目较年轻，故保留 mlx-audio 备胎 |
-| 引擎进程模型 | 云端同进程调用；本地引擎独立子进程调用 | 本地 MLX 模型加载慢、内存大，用"工作进程"方式按需拉起、空闲回收，避免常驻挤占 16GB 内存 |
+| 引擎进程模型 | 云端同进程调用；本地引擎独立子进程调用 | 本地 MLX 模型加载慢、内存大，用"工作进程"方式按需拉起、空闲回收，避免常驻挤占 16GB 内存。**worker 为模块级全局单例**（2026-11-15 修复：早期版本挂在 provider 实例上，而 get_provider() 每次新建实例，导致多任务/试听各自拉起独立 worker、各加载一份完整模型，16G 内存机器多份模型叠加曾全机卡死；现全后端仅一个 worker、一份模型，fp16 配置漂移时才重启） |
 | 进度推送 | 轮询（GET /tasks/{id}） | 实现简单可靠；WebSocket 留作 M4 可选增强 |
 | 任务编排框架 | **不引入 LangGraph** | 本项目状态机为确定性直线（5 节点、无动态路由、无 LLM 在环），断点续跑用数据库行级状态即可；LangGraph 的价值（agent 图编排/条件路由/checkpoint 快照）与需求错配，且会带来 langchain-core 重依赖与调试黑盒。触发重评条件：未来引入 LLM 稿件预处理、TTS→ASR→LLM 质量校验闭环、人工审核卡点时 |
 
@@ -294,9 +294,12 @@ voice-script-studio/
 │   ├── data/                    # 运行数据（gitignore：db、config.json、tasks/、voices/）
 │   ├── requirements.txt
 │   └── tests/                   # 分句/管道/断点续跑单测（mock provider 驱动）
-├── frontend/
-│   ├── index.html               # 单页（音色/工作台/设置/历史四视图）
-│   └── static/                  # app.js / style.css（原生，无构建）
+├── frontend-vue/                # 新版 WebUI：Vite + Vue3 + Pinia（P3 起 8410 直接服务 dist/）
+│   ├── src/                     # views（工作台/素材库/设置）/ components / stores / api
+│   └── dist/                    # 构建产物（npm run build；FastAPI 挂载 /assets）
+├── frontend-legacy/             # 旧版单页（原生 HTML/JS，P3 归档，仅回滚参考）
+│   ├── index.html
+│   └── static/                  # app.js / style.css
 ├── docs/
 │   └── ARCHITECTURE.md          # 本文档
 └── README.md
@@ -359,6 +362,8 @@ v1 已按上述设计实现并通过 18 项测试 + 真实服务冒烟。与文�
 | 11 | 音色库页新增「🔄 同步音色库」按钮：`GET /api/voices?refresh=1` 清 TTL 缓存强制回源；预置音色 training 态标注并禁用试听；刷新失败保留旧列表 | 原被动 60s 缓存下，网页端新建音色需干等过期；用户确认方案 A。训练中音色直接合成会失败，顺手把 state 透传成友好标注 |
 | 12 | 新增 `GET /api/voices/{id}/audio` 参考音频下载端点；fish_cloud 注册 403（免费 API 档音色创建配额为 0/0）转为中文引导；音色卡补齐「下载参考音频 / 复制逐字稿 / 补注册」按钮 | 真实验证发现 Fish 免费网页版含 3 个音色槽位、但 API 侧创建音色是独立计费（免费 0 个）——下载端点让归档录音可复用到网页端创建，创建后经 self=true 自动同步回本地预置音色 |
 | 13 | 整稿下载支持三格式（`?format=wav\|mp3\|m4a`），前端改三按钮；新增 pipeline/encoder.py：mp3=lameenc 128k CBR（纯 wheel 依赖）、m4a=系统 afconvert、按需转码 + 母带 mtime 指纹缓存 | 用户确认方案；WAV 为唯一母带，压缩格式仅是下载视图——避免合成侧维护多份产物；重试段/续跑后母带变化时旧缓存自动失效 |
+| 14 | 工作台改「引擎→音色」级联（引擎在上、音色仅列该引擎可用项，本地引擎无音色时给引导文案）；音色库升级引擎关系展示：创建表单（上传/录音）加注册引擎多选（register_providers 参数）、音色卡徽章矩阵（display_name + 补注册）、预置音色卡加「引擎专属」标注、创建反馈结构化 | 用户因「李苟蛋的声音01（云端）配本地引擎」合成失败提出；级联从交互上根除错配，徽章矩阵修正"音色与引擎关系不可见"的认知断层。多选而非单选：本地音色非训练产物、可多引擎复用，单选会强化错误心智 |
+| 15 | 注册改为**单引擎单选下拉**（cosyvoice_local 默认 / fish_cloud 配额警示 / mock / **"暂不注册仅存素材库"**）；注册失败整体回滚（删文件+不落库）返回 400；音色库页拆「我的音色」与「声音素材库」两组；30 秒前置校验（wav 读头，按最严格引擎） | 用户指正：多选在"Fish 必然 403"现实下每次都产生部分失败噪音；单动作-单结局更诚实。素材（原材料）与音色（注册产物）分离是更准确的领域建模——"库里每个音色都可用"的不变式因此成立 |
 
 补充（2026-11-14 真实云端验证）：apiKey 已配置（掩码 ****DSbA）、出网代理 127.0.0.1:7890；
 `POST /api/providers/fish_cloud/test` 真实鉴权通过；用平台公开音色「央视配音」完成全链路

@@ -39,6 +39,7 @@ class MockProvider(TTSProvider):
             sample_rate_hz=_SAMPLE_RATE,
             has_preset_voices=True,
             needs_registration=False,
+            supported_params={"speed": True, "volume": False},  # 音节时长随 speed 缩短
             notes="不联网、不调模型，仅用于全流程自测",
         )
 

@@ -46,8 +46,9 @@ backend/
 │   ├── providers/         # base（抽象）fish_cloud（REST 直调）mock（离线自测）
 │   └── store/             # db（SQLite）config（0600 配置 + 密钥脱敏）
 ├── data/                  # 运行数据（gitignore：db / config.json / 音频工件）
-└── tests/                 # 29 项单测 + 端到端集成测试
-frontend/                  # 单页 WebUI（原生 HTML/JS/CSS，无构建）
+└── tests/                 # 54 项单测 + 端到端集成测试
+frontend-vue/              # 新版 WebUI（Vite + Vue3 + Pinia；构建产物 dist/ 由 FastAPI 托管）
+frontend-legacy/           # 旧版单页（原生 HTML/JS，P3 归档，仅作回滚参考）
 docs/ARCHITECTURE.md       # 技术架构设计（含 v1 实现偏差说明）
 ```
 

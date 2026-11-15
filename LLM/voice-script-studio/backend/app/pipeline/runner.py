@@ -69,12 +69,22 @@ class TaskRunner:
 
     @staticmethod
     def start_or_resume(task_id: str) -> Dict[str, Any]:
-        """启动或续跑任务。已在运行 → 返回 running；已完成 → 幂等返回状态。"""
+        """启动或续跑任务。已在运行 → 返回 running；已完成 → 幂等返回状态。
+
+        本地引擎暖机门禁（用户定稿 2026-11-15）：开始合成前校验 ready，
+        未暖机/暖机中 → 409 语义错误（创建任务放行，仅开始时拦截）。
+        """
         task = db.get_task(task_id)
         if task is None:
             raise KeyError(f"任务不存在: {task_id}")
         if task["status"] in ("done",):
             return {"task_id": task_id, "status": "done", "message": "任务已完成"}
+
+        if task["provider_id"] == "cosyvoice_local":
+            from app.providers.cosyvoice_local import NotWarmedError, warm_info
+            wi = warm_info()
+            if wi["warm_state"] != "ready":
+                raise NotWarmedError()   # API 层转 409 + not_warmed
 
         with _RUNNING_LOCK:
             thread = _RUNNING.get(task_id)
@@ -150,9 +160,19 @@ def _run_task(task_id: str) -> None:
 
 def _synthesize_pending(task_id: str, provider, caps, synth_cfg: Dict) -> None:
     """段级调度：线程池并发合成 pending 段，成功即落盘（断点续跑的写侧）。"""
-    voice_key = db.get_task(task_id)["voice_key"]
+    task = db.get_task(task_id)
+    voice_key = task["voice_key"]
     engine_voice_key = _resolve_voice_key(task_id, provider.id, voice_key)
-    params = SynthParams(emotion_tags_allowed=caps.supports_emotion_tags)
+    # 参数按引擎能力守门（P2-0）：Caps 未声明的参数不传，引擎端拿到的恒为默认值
+    tp = task.get("params") or {}
+    sp = caps.supported_params or {}
+    params = SynthParams(
+        emotion_tags_allowed=caps.supports_emotion_tags,
+        speed=max(0.5, min(float(tp.get("speed", 1.0)), 2.0))
+        if sp.get("speed") else 1.0,
+        volume_db=max(-20.0, min(float(tp.get("volume_db", 0.0)), 20.0))
+        if sp.get("volume") else 0.0,
+    )
 
     def work(seg: Dict) -> None:
         _synthesize_one(task_id, provider, caps, engine_voice_key,
@@ -194,11 +214,21 @@ def _synthesize_one(task_id: str, provider, caps, engine_voice_key: str,
 
 
 def _resolve_voice_key(task_id: str, provider_id: str, voice_key: str) -> str:
-    """本地克隆 key → 引擎级 key。
+    """任务 voice_key → 引擎级 key。三种形态（与 API 试听解析规则一致）：
 
-    "clone:<本地uuid>" 需查 DB registrations 拿到该引擎侧的真实引用；
-    "preset:<id>" 原样透传。未注册的克隆音色给出明确报错。
+    - "voiceent:<音色id>"   P2-0 新模型：查 voice_entities（新前端用）
+    - "clone:<素材id>"      旧模型：查 DB registrations（旧前端/历史任务兼容）
+    - "preset:<id>"        原样透传
+    未注册/已删除给出明确报错。
     """
+    if voice_key.startswith("voiceent:"):
+        ent = db.get_voice_entity(voice_key[len("voiceent:"):])
+        if ent is None:
+            raise KeyError(f"音色不存在或已删除: {voice_key}")
+        if ent["engine"] != provider_id:
+            raise PermissionError(
+                f"音色「{ent['name']}」归属引擎 {ent['engine']}，与任务引擎 {provider_id} 不符")
+        return ent["voice_key"]
     if not voice_key.startswith("clone:"):
         return voice_key
     local_id = voice_key[len("clone:"):]

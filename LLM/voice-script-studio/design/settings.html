@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P0 原型 · 设置 — Voice Script Studio（Vue + proto.css）</title>
+<link rel="stylesheet" href="assets/proto.css">
+<script src="assets/vendor/vue.global.prod.js"></script>
+<style>
+  .set-wrap { max-width: 880px; margin: 20px auto; padding: 0 28px 40px; }
+  .set-wrap > .panel { margin-bottom: 16px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .engine-head { display: flex; justify-content: space-between; align-items: center;
+    width: 100%; margin-bottom: 12px; }
+  .engine-head .t { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  /* 开关（自研，替代组件库） */
+  .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 13px; color: #606266; }
+  .switch .track { width: 38px; height: 20px; border-radius: 10px; background: #dcdfe6;
+    position: relative; transition: background .2s; }
+  .switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px;
+    height: 16px; border-radius: 50%; background: #fff; transition: left .2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .switch.on .track { background: #409eff; }
+  .switch.on .track::after { left: 20px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <span class="logo">🎙 Voice Script Studio</span>
+    <nav class="nav">
+      <a href="workbench.html">工作台</a>
+      <a href="library.html">素材库</a>
+      <a class="active" href="#">设置</a>
+    </nav>
+    <span class="spacer"></span>
+    <span class="status">● {{ enabledCount }} 个引擎已启用</span>
+  </div>
+
+  <div class="set-wrap">
+
+    <!-- Fish 云端 -->
+    <div class="panel">
+      <div class="engine-head">
+        <span class="t">☁️ Fish 云端
+          <span class="badge" :class="engines.fish.enabled ? 'ok' : 'info'"
+                @click="engines.fish.enabled=!engines.fish.enabled"
+                style="cursor:pointer">{{ engines.fish.enabled ? '已启用' : '已停用' }}</span></span>
+        <span class="badge info">云端引擎 · 并发 ≤2</span>
+      </div>
+      <label class="ep-label">API Key</label>
+      <div class="ep-input" style="justify-content:space-between">
+        <span>sk-fish-****DSbA</span><a href="#" @click.prevent>更换</a>
+      </div>
+      <div class="row2" style="margin-top:4px">
+        <div>
+          <label class="ep-label">模型</label>
+          <select class="ep-select" style="width:100%; height:34px">
+            <option>s2.1-pro-free（免费档至 2026-11-30）</option>
+            <option>s2.1-pro（付费档）</option>
+          </select>
+        </div>
+        <div>
+          <label class="ep-label">出网代理（沙箱环境必填）</label>
+          <input class="ep-input" value="http://127.0.0.1:7890" />
+        </div>
+      </div>
+      <div class="tip warn">免费档无 SLA、请求可能用于模型改进；免费窗口到期后切付费仅改模型串</div>
+      <button class="ep-btn primary">测试连接</button>
+      <button class="ep-btn">停用引擎</button>
+    </div>
+
+    <!-- CosyVoice3 本地 -->
+    <div class="panel">
+      <div class="engine-head">
+        <span class="t">💻 CosyVoice3 本地
+          <span class="badge" :class="engines.local.enabled ? 'ok' : 'info'"
+                @click="engines.local.enabled=!engines.local.enabled"
+                style="cursor:pointer">{{ engines.local.enabled ? '已启用' : '已停用' }}</span></span>
+        <span class="badge info">本地引擎 · 并发 1 · Apache-2.0</span>
+      </div>
+      <div style="font-size:12.5px; color:#909399; line-height:1.8; margin-bottom:8px">
+        权重 5.1GB 已安装（local_engines/cosyvoice3）· 输出 24kHz · 合成慢于实时（RTF≈3，批量场景适用）
+      </div>
+      <div class="row2">
+        <div>
+          <label class="ep-label">半精度推理 fp16（提速约 30%）</label>
+          <div class="switch" :class="{on: fp16}" @click="fp16=!fp16">
+            <span class="track"></span>{{ fp16 ? '开启' : '关闭（稳妥）' }}
+          </div>
+        </div>
+        <div>
+          <label class="ep-label">空闲回收（释放内存，秒）</label>
+          <input class="ep-input" v-model.number="idleKill" type="number" min="60" step="60" />
+        </div>
+      </div>
+      <div class="tip info">「暖机」会加载全部权重（约 80 秒）；完成后 5 分钟内合成免等待</div>
+      <button class="ep-btn primary">🔥 暖机引擎</button>
+      <button class="ep-btn">停用引擎</button>
+    </div>
+
+    <!-- Mock -->
+    <div class="panel">
+      <div class="engine-head">
+        <span class="t">🧪 Mock
+          <span class="badge" :class="engines.mock.enabled ? 'ok' : 'info'"
+                @click="engines.mock.enabled=!engines.mock.enabled"
+                style="cursor:pointer">{{ engines.mock.enabled ? '已启用' : '已停用' }}</span></span>
+        <span class="badge info">离线自测 · 嘟声非语音</span>
+      </div>
+      <div style="font-size:12.5px; color:#909399">无网络无模型也能跑通全流程（正弦波占位音频）</div>
+      <div style="margin-top:12px"><button class="ep-btn">停用引擎</button></div>
+    </div>
+
+    <!-- 全局参数 -->
+    <div class="panel">
+      <h2>全局合成参数
+        <span class="sub">所有引擎共用的默认值（任务级可覆盖）</span>
+      </h2>
+      <div class="row2">
+        <div>
+          <label class="ep-label">分句目标上限（字/段）</label>
+          <input class="ep-input" v-model.number="charsPerSeg" type="number" min="30" max="200" step="10" />
+        </div>
+        <div>
+          <label class="ep-label">段级最大重试</label>
+          <input class="ep-input" v-model.number="maxRetry" type="number" min="1" max="5" />
+        </div>
+      </div>
+      <div class="row2" style="margin-top:4px">
+        <div>
+          <label class="ep-label">段间停顿（秒）</label>
+          <input class="ep-input" v-model.number="pauseSeg" type="number" min="0" max="2" step="0.05" />
+        </div>
+        <div>
+          <label class="ep-label">段落间停顿（秒）</label>
+          <input class="ep-input" v-model.number="pausePara" type="number" min="0" max="3" step="0.1" />
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const { createApp, reactive, ref, computed } = Vue;
+createApp({
+  setup() {
+    const engines = reactive({
+      fish: { enabled: true },
+      local: { enabled: true },
+      mock: { enabled: true },
+    });
+    const enabledCount = computed(() =>
+      Object.values(engines).filter(e => e.enabled).length);
+    const fp16 = ref(false), idleKill = ref(300);
+    const charsPerSeg = ref(80), maxRetry = ref(3), pauseSeg = ref(0.35), pausePara = ref(0.8);
+    return { engines, enabledCount, fp16, idleKill, charsPerSeg, maxRetry, pauseSeg, pausePara };
+  },
+}).mount("#app");
+</script>
+</body>
+</html>

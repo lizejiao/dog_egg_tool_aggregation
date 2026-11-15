@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P0 原型 · 素材库 — Voice Script Studio（Vue + proto.css）</title>
+<link rel="stylesheet" href="assets/proto.css">
+<script src="assets/vendor/vue.global.prod.js"></script>
+<style>
+  .lib-wrap { max-width: 1400px; margin: 20px auto; padding: 0 28px 40px; }
+  .lib-row { display: grid; gap: 16px; align-items: stretch; margin-bottom: 16px; }
+  .lib-row.cols2 { grid-template-columns: 1fr 1fr; }
+  .rec-bar { display: flex; align-items: center; gap: 12px; margin: 12px 0; padding: 12px;
+    border: 1px solid #ebeef5; border-radius: 8px; background: #fafbfc; }
+  .rec-time { font-family: ui-monospace, Menlo, monospace; font-size: 15px; color: #444; min-width: 66px; }
+  .rec-level { display: flex; align-items: flex-end; gap: 3px; height: 34px; flex: 1; }
+  .rec-level i { display: block; width: 4px; border-radius: 2px; background: #b7c4e4; }
+  .task-head { display: flex; justify-content: space-between; align-items: center; }
+  .upload-zone { border: 1px dashed #c0c4cc; border-radius: 6px; padding: 20px 0;
+    text-align: center; color: #909399; font-size: 13px; cursor: pointer; transition: all .15s; }
+  .upload-zone:hover { border-color: #409eff; color: #409eff; }
+  .req { color: #f56c6c; font-weight: 400; font-size: 12px; }
+  .field-when { font-size: 12px; color: #909399; font-weight: 400; }
+  /* 引擎页签 */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid #ebeef5; margin-bottom: 12px; }
+  .tabs .tab { padding: 7px 16px; font-size: 13px; color: #606266; cursor: pointer;
+    border-radius: 6px 6px 0 0; margin-bottom: -1px; border: 1px solid transparent; }
+  .tabs .tab.active { color: #409eff; border-color: #ebeef5 #ebeef5 #fff;
+    background: #fff; font-weight: 600; }
+  .reg-form { border: 1px solid #e1f0ff; background: #f7fbff; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 14px; }
+  .reg-form .row3 { display: grid; grid-template-columns: 1.1fr 1.1fr 1.1fr auto;
+    gap: 8px; align-items: end; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <span class="logo">🎙 Voice Script Studio</span>
+    <nav class="nav">
+      <a href="workbench.html">工作台</a>
+      <a class="active" href="#">素材库</a>
+      <a href="settings.html">设置</a>
+    </nav>
+    <span class="spacer"></span>
+    <span class="status">素材 {{ materials.length }} · 音色 {{ voiceTotal }} 个</span>
+  </div>
+
+  <div class="lib-wrap">
+
+    <!-- 行 1：录音 | 上传 -->
+    <div class="lib-row cols2">
+      <div class="panel">
+        <h2>直接录音克隆 <span class="sub">照提示词朗读，逐字稿一字不差</span></h2>
+        <label class="ep-label">录音提示词（可编辑；提交时即逐字稿）</label>
+        <textarea class="ep-textarea" rows="3" v-model="recPrompt" style="resize:vertical"></textarea>
+        <div class="rec-bar">
+          <button class="ep-btn primary">● 开始录音</button>
+          <span class="rec-time">{{ recTime }}</span>
+          <div class="rec-level">
+            <i v-for="n in 9" :key="n" :style="{height: lv[n-1] + 'px'}"></i>
+          </div>
+          <span class="badge" :class="recOver ? 'miss' : 'ok'">{{ recDur }} {{ recOver ? '超限' : '合规' }}</span>
+        </div>
+        <div v-if="recOver" class="tip warn">
+          ⚠️ 超过 30 秒上限（CosyVoice3 要求 ≤30s），提交将被拦截——请停止后重录
+        </div>
+
+        <label class="ep-label">声音素材名称 <span class="req">*</span>
+          <span class="field-when">（保存后进入素材库；在「音色管理」中注册为可用音色）</span></label>
+        <input class="ep-input" v-model="recMatName" placeholder="例如：狗蛋录音-2026.11" />
+        <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap">
+          <button class="ep-btn primary">保存素材</button>
+          <button class="ep-btn">重新录音</button>
+        </div>
+        <div class="tip info" style="margin-top:10px">
+          保存的素材在下方素材库；要用于合成，请到「音色管理」→ 注册新音色（选素材 + 选引擎 + 命名）
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>上传克隆音色 <span class="sub">10~30 秒干净单人声，逐字稿一字不差</span></h2>
+        <label class="ep-label">参考音频（wav / mp3 / m4a / opus）</label>
+        <div class="upload-zone">📄 拖拽文件到此处或点击上传 · ≤20MB · ≤30 秒</div>
+        <label class="ep-label">逐字稿（录音里说的话）</label>
+        <textarea class="ep-textarea" rows="2" placeholder="与录音内容完全一致的文字"
+          style="resize:vertical"></textarea>
+        <label class="ep-label">声音素材名称 <span class="req">*</span>
+          <span class="field-when">（保存后进入素材库；在「音色管理」中注册为可用音色）</span></label>
+        <input class="ep-input" placeholder="例：访谈录音-李苟蛋" />
+        <div style="margin-top:14px; display:flex; gap:8px">
+          <button class="ep-btn primary">保存素材</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 行 2：素材库 | 音色管理（引擎页签，含预置音色） -->
+    <div class="lib-row cols2">
+      <div class="panel">
+        <h2>我的声音素材库
+          <span class="sub">录音+逐字稿=素材；注册引擎后才成为音色</span>
+        </h2>
+        <div v-for="m in materials" :key="m.name" class="card">
+          <div class="task-head">
+            <b style="font-size:13.5px">{{ m.name }}</b>
+            <span class="badge info">{{ m.dur }}</span>
+          </div>
+          <div style="font-size:12.5px; color:#909399; margin:8px 0">
+            逐字稿：{{ m.text.slice(0, 40) }}…
+          </div>
+          <button class="ep-btn small">▶ 试听</button>
+          <button class="ep-btn small">下载参考音频</button>
+          <button class="ep-btn small">复制逐字稿</button>
+          <button class="ep-btn small danger">删除</button>
+        </div>
+        <div class="tip info" v-if="delHint" style="margin-top:8px">{{ delHint }}</div>
+      </div>
+
+      <div class="panel">
+        <h2>音色管理
+          <span class="sub">按引擎查看与管理；含预置音色</span>
+        </h2>
+
+        <!-- 注册新音色（素材 → 音色 的质变入口） -->
+        <div class="reg-form">
+          <div style="font-size:13px; font-weight:600; color:#303133; margin-bottom:8px">
+            ＋ 注册新音色 <span class="field-when">（选素材 → 选引擎 → 命名，音色名称同一引擎内必填且唯一）</span>
+          </div>
+          <div class="row3">
+            <div>
+              <label class="ep-label" style="margin:0 0 4px">声音素材</label>
+              <select class="ep-select" style="width:100%; height:32px" v-model="regMat">
+                <option v-for="m in materials" :key="m.name" :value="m.name">{{ m.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="ep-label" style="margin:0 0 4px">引擎</label>
+              <select class="ep-select" style="width:100%; height:32px" v-model="regEngine">
+                <option value="local">CosyVoice3 本地</option>
+                <option value="cloud">Fish 云端</option>
+              </select>
+            </div>
+            <div>
+              <label class="ep-label" style="margin:0 0 4px">音色名称 <span class="req">*</span></label>
+              <input class="ep-input" style="height:32px" v-model="regName"
+                     placeholder="同一引擎内不可重名" />
+            </div>
+            <button class="ep-btn primary" style="height:32px" @click="doRegister">注册</button>
+          </div>
+        </div>
+
+        <!-- 引擎页签 -->
+        <div class="tabs" style="align-items:center">
+          <div class="tab" :class="{active: tab==='local'}" @click="tab='local'">💻 CosyVoice3 本地</div>
+          <div class="tab" :class="{active: tab==='cloud'}" @click="tab='cloud'">☁️ Fish 云端</div>
+          <span v-if="tab==='cloud'" style="margin-left:auto; display:inline-flex; gap:8px; align-items:center">
+            <button class="ep-btn small">🔄 同步云端音色</button>
+          </span>
+        </div>
+        <div v-if="tab==='cloud'" class="tip info" style="margin:0 0 10px">
+          📌 云端音色（含新建/删除）在
+          <a href="https://fish.audio/zh-CN/app/my-voices/" target="_blank" rel="noopener">fish.audio 我的音色页</a>
+          管理；网页端有变动后点「同步云端音色」拉取最新列表（免费档 API 无创建配额，
+          建议在网页端创建）
+        </div>
+
+        <div v-for="v in voicesOf(tab)" :key="v.name" class="card">
+          <div class="task-head">
+            <b style="font-size:13.5px">{{ v.name }}</b>
+            <span style="display:inline-flex; gap:6px">
+              <span class="badge" :class="v.preset ? 'own' : 'ok'">{{ v.preset ? '预置' : '我的音色' }}</span>
+              <span v-if="v.state" class="badge info">{{ v.state }}</span>
+            </span>
+          </div>
+          <div style="font-size:12px; color:#909399; margin:6px 0 8px">
+            {{ v.preset ? v.desc : '来自素材：' + v.from + ' · 可用于合成' }}
+          </div>
+          <button v-if="!v.preset" class="ep-btn small" :disabled="!v.ready">▶ 试听</button>
+          <button v-else class="ep-btn small" :disabled="!v.ready">▶ 试听</button>
+          <button v-if="!v.preset" class="ep-btn small danger">删除</button>
+        </div>
+        <div class="tip info" style="margin-top:8px">
+          预置音色来自云端音色库（仅所属引擎可用）；删除我的音色不影响素材库中的素材
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive, computed } = Vue;
+createApp({
+  setup() {
+    const recPrompt = ref("大家好，我是……（提示词模板，覆盖数字与中英混读）");
+    const recTime = ref("00:36.3"), recDur = ref("36.3s");
+    const recOver = computed(() => parseFloat(recTime.value.slice(3)) > 30);
+    const recMatName = ref("狗蛋录音-2026.11");
+    const lv = [6, 14, 24, 10, 30, 18, 8, 22, 12];
+
+    const materials = ref([
+      { name: "李苟蛋的声音01", text: "今天想花几分钟，和大家分享一段我最近一直在思考的内容……", dur: "28.9s" },
+      { name: "访谈备份素材", text: "这一段是访谈原始录音，先存着……", dur: "21.2s" },
+    ]);
+
+    // 音色 = 注册产物（引擎归属 + 自有名称）；预置音色并入对应引擎
+    const voices = reactive([
+      { name: "我的演讲声-本地版", engine: "local", preset: false, from: "李苟蛋的声音01", ready: true },
+      { name: "李苟蛋的声音01", engine: "cloud", preset: true, desc: "网页端创建，自动同步 · 就绪", ready: true },
+      { name: "央视配音", engine: "cloud", preset: true, desc: "专业解说风格 · 就绪", ready: true },
+      { name: "新上传音色-处理中", engine: "cloud", preset: true, desc: "⏳ 训练中（稍后点同步再试）", ready: false, state: "训练中" },
+    ]);
+    const voicesOf = (tab) => voices.filter(v => v.engine === tab);
+    const voiceTotal = computed(() => voices.length);
+
+    const tab = ref("local");
+    const regMat = ref("李苟蛋的声音01");
+    const regEngine = ref("local");
+    const regName = ref("");
+    const dupName = ref(false);
+    const delHint = ref("删除「访谈备份素材」时将提示：有 0 个音色依赖此素材（有音色时需先删音色）");
+    const doRegister = () => {
+      dupName.value = voices.some(v => v.engine === regEngine.value && v.name === regName.value);
+      if (!regName.value.trim()) { alert("请填写音色名称（同一引擎内必填且唯一）"); return; }
+      if (dupName.value) { alert("该引擎已存在同名音色，请换一个名字"); return; }
+      voices.push({ name: regName.value.trim(), engine: regEngine.value,
+        preset: false, from: regMat.value, ready: true });
+      regName.value = "";
+    };
+    return { recPrompt, recTime, recDur, recOver, recMatName,
+      lv, materials, voices, voicesOf, voiceTotal, tab,
+      regMat, regEngine, regName, dupName, delHint, doRegister };
+  },
+}).mount("#app");
+</script>
+</body>
+</html>

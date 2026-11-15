@@ -92,6 +92,8 @@ class FishCloudProvider(TTSProvider):
             sample_rate_hz=44100,         # Fish 输出 44.1kHz
             has_preset_voices=True,       # 云端音色库（self=true 列举）
             needs_registration=True,      # 克隆音色需先 POST /model 注册
+            supported_params={"speed": True, "volume": True},
+            # （官方 OpenAPI：prosody.speed 0.5~2.0 倍数；prosody.volume 为 dB 偏移 -20~20）
             notes="免费档无 SLA、请求可能用于改进模型；切付费仅改模型串",
         )
 
@@ -218,8 +220,14 @@ class FishCloudProvider(TTSProvider):
             "format": "wav",
             "normalize": True,            # 响度归一（官方字段）
         }
+        # 韵律参数：只在用户改过默认值时下发（省 token & 避免服务端差异）
+        prosody: Dict[str, Any] = {}
         if abs(params.speed - 1.0) > 0.01:
-            body["prosody"] = {"speed": round(params.speed, 2)}
+            prosody["speed"] = round(params.speed, 2)
+        if abs(params.volume_db) > 0.05:
+            prosody["volume"] = round(params.volume_db, 1)
+        if prosody:
+            body["prosody"] = prosody
         headers = self._auth_headers()
         headers.update({"Content-Type": "application/json", "model": self.model})
         try:

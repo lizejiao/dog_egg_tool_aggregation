@@ -64,10 +64,11 @@ class TestEndToEnd(unittest.TestCase):
     # ------------------------------------------------------------ 音色
 
     def test_01_create_and_list_voice(self):
-        """上传克隆音色 → mock 自动注册 → 出现在列表。"""
+        """上传克隆音色 → 注册指定引擎 → 出现在列表。"""
         r = client.post("/api/voices", data={
             "name": "测试音色",
             "ref_text": "这是逐字稿测试内容，与录音一致。",
+            "register_provider": "mock",
         }, files={"audio": ("ref.wav", _tiny_wav_bytes(), "audio/wav")})
         self.assertEqual(r.status_code, 200, r.text)
         body = r.json()
@@ -231,6 +232,56 @@ class TestEndToEnd(unittest.TestCase):
 
 class PresetRefreshTest(unittest.TestCase):
     """?refresh=1 必须清空 60s TTL 缓存强制回源（网页端新建音色即时可同步）。"""
+
+    def test_register_providers_filter(self):
+        """单引擎注册：register_provider 只注册指定引擎，其余不出现。"""
+        r = client.post("/api/voices",
+                        data={"name": "单引擎注册音色",
+                              "ref_text": "测试逐字稿内容",
+                              "register_provider": "cosyvoice_local"},
+                        files={"audio": ("a.wav", _tiny_wav_bytes(0.2), "audio/wav")})
+        self.assertEqual(r.status_code, 200)
+        d = r.json()
+        self.assertIn("cosyvoice_local", d["registrations"])
+        self.assertNotIn("mock", d["registrations"])
+        self.assertFalse(d["material_only"])
+
+    def test_material_only_mode(self):
+        """register_provider=none：仅存素材库，不入注册、不报错。"""
+        r = client.post("/api/voices",
+                        data={"name": "仅素材音色",
+                              "ref_text": "素材逐字稿",
+                              "register_provider": "none"},
+                        files={"audio": ("a.wav", _tiny_wav_bytes(0.2), "audio/wav")})
+        self.assertEqual(r.status_code, 200)
+        d = r.json()
+        self.assertTrue(d["material_only"])
+        self.assertEqual(d["registrations"], {})
+
+    def test_register_failure_rolls_back(self):
+        """注册失败（引擎未配置）：整体回滚——不落库、文件删除。"""
+        from app.store import db as _db
+        import os as _os
+        r = client.post("/api/voices",
+                        data={"name": "注定失败的音色",
+                              "ref_text": "逐字稿",
+                              "register_provider": "fish_cloud"},
+                        files={"audio": ("a.wav", _tiny_wav_bytes(0.2), "audio/wav")})
+        # fish_cloud 免费档无配额（或未配 key）→ 400 + 回滚
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("未保存", r.json()["detail"])
+        # 库里不应有该名称的记录（含软删除也不该有新行）
+        names = [v["name"] for v in _db.list_voices()]
+        self.assertNotIn("注定失败的音色", names)
+
+    def test_oversize_wav_rejected(self):
+        """30 秒前置校验：超长 wav 直接 400 拦截（最严格引擎上限）。"""
+        r = client.post("/api/voices",
+                        data={"name": "超长音色", "ref_text": "x",
+                              "register_provider": "cosyvoice_local"},
+                        files={"audio": ("a.wav", _tiny_wav_bytes(35), "audio/wav")})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("30 秒", r.json()["detail"])
 
     def setUp(self):
         from app.api import voices as voices_api

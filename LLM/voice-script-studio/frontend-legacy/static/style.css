@@ -144,3 +144,21 @@ h2 .btn-refresh:disabled { opacity: .6; cursor: wait; }
   opacity: .5; cursor: not-allowed; pointer-events: auto;
   filter: grayscale(.6);
 }
+
+/* ---------- 引擎徽章与注册多选 ---------- */
+.badge {
+  display: inline-block; padding: 1px 8px; margin: 1px 2px;
+  border-radius: 9px; font-size: 12px; vertical-align: middle;
+}
+.badge.ok  { background: #e3f2e6; color: #256b35; }
+.badge.miss{ background: #f3f0e6; color: #8a6d1a; }
+.badge.miss a { color: #8a6d1a; text-decoration: underline; margin-left: 3px; }
+.badge.own { background: #e8eef8; color: #3a5a9c; }
+fieldset.reg-engines {
+  border: 1px solid #e3e6ea; border-radius: 8px;
+  margin: 10px 0; padding: 8px 12px;
+}
+fieldset.reg-engines legend { font-size: 13px; color: #555; padding: 0 4px; }
+fieldset.reg-engines .chk {
+  display: block; margin: 4px 0; font-size: 13px; color: #333;
+}

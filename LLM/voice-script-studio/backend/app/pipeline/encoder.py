@@ -101,14 +101,16 @@ def _encode_mp3(wav_path: str, out_path: str) -> None:
 # ---------------------------------------------------------------- M4A（afconvert）
 
 def _encode_m4a(wav_path: str, out_path: str) -> None:
-    """afconvert：WAV → AAC（m4a 容器）。macOS 自带，零依赖。"""
+    """afconvert：WAV → AAC（m4a 容器）。macOS 自带，零依赖。
+
+    注意：不要显式指定 `-b` 码率——TTS 母带多为 24kHz 单声道，AFConvert 对该
+    组合拒绝设置码率属性（报 "Couldn't set audio converter property ('!dat')"），
+    交给 AAC 编码器按采样率/声道自动选择码率即可（实测 24k mono ≈ 96kbps，
+    语音场景足够）。
+    """
     if not os.path.isfile(AFCONVERT):
         raise RuntimeError("M4A 导出依赖 macOS 自带的 afconvert，当前系统未找到")
-    cmd = [
-        AFCONVERT, "-f", "m4af", "-d", "aac",
-        "-b", str(MP3_BITRATE_KBPS * 1000),  # 目标码率 128kbps
-        wav_path, out_path,
-    ]
+    cmd = [AFCONVERT, "-f", "m4af", "-d", "aac", wav_path, out_path]
     try:
         proc = subprocess.run(cmd, capture_output=True, timeout=120)
     except subprocess.TimeoutExpired as e:
